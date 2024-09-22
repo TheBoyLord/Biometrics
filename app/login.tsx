@@ -41,7 +41,7 @@ export default function LoginScreen() {
       });
 
       if (result.success) {
-        createTwoButtonAlert('Biometrics Available', 'Used biometrics to login', 'OK', () => console.log('logged in with face'));
+        createTwoButtonAlert('Biometrics Available', 'Used biometrics to login:', 'OK', () => console.log('logged in with face'));
         router.push("/explore"); // Navigate to the Home screen
       }
     } else {
