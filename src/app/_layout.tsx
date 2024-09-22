@@ -1,24 +1,24 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useState, useEffect } from 'react';
 import 'react-native-reanimated';
-import { View, Text } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { useColorScheme } from '@hooks/useColorScheme';
 
 import * as LocalAuthentication from 'expo-local-authentication';
 
+import { useFonts, Inter_900Black } from '@expo-google-fonts/inter'; 
+import { 
+  AmaticSC_400Regular, 
+  AmaticSC_700Bold 
+} from '@expo-google-fonts/amatic-sc'; 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-    //====================================================================================
+  //====================================================================================
   // Biometric functions
   //====================================================================================
   const [deviceHasBiometric, setDeviceHasBiometric] = useState(false);
@@ -32,7 +32,6 @@ export default function RootLayout() {
       setDeviceHasBiometric(true);
       console.log('App:checkDeviceForHardware:true');
       handleAuthentication();
-      
     } else {
       setDeviceHasBiometric(false);
       console.log('App:checkDeviceForHardware:false');
@@ -50,7 +49,7 @@ export default function RootLayout() {
   }
   const handleAuthentication = async() => {
     //this.props.navigation.navigate("HOME")
-    //  alert('navigate to swelcome screen');
+    //  alert('navigate to welcome screen');
     let result = await LocalAuthentication.authenticateAsync();
     console.log("handleAuthentication");
     console.log(result);
@@ -64,8 +63,14 @@ export default function RootLayout() {
     }
   }
 
+  let [fontsLoaded, fontError] = useFonts ({
+    Inter: Inter_900Black,
+    Amatic: AmaticSC_400Regular,
+    AmaticBold: AmaticSC_700Bold
+  });
+
   useEffect(() => {
-    if(loaded) {
+    if(fontsLoaded || fontError) {
       SplashScreen.hideAsync();
       console.log('run on app init');
       checkDeviceForHardware();
@@ -81,9 +86,9 @@ export default function RootLayout() {
         console.log('biometrics not found or not available');
       }
     }
-  }, [loaded]);
+  }, [fontsLoaded, fontError]);
 
-  if(!loaded) {
+  if(!fontsLoaded && !fontError) {
     return null;
   }
 
@@ -91,13 +96,21 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>  
  
  {isAuthenticated ? 
-      <Stack>  
+
+  <Stack>  
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
-      </Stack> : 
+      </Stack>
+: 
 
-      <View><Text>Not a valid pin</Text></View>}
+      <View><Text style={styles.myStyle}>Not a valid pin</Text></View>}
      
     </ThemeProvider>
   );
 }
+const styles = StyleSheet.create({
+  myStyle: {
+    fontFamily: 'AmaticBold',
+  },
+  
+});

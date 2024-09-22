@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { Platform, Pressable, Text, View, Button, StyleSheet } from 'react-native';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@components/ThemedText';
+import { ThemedView } from '@components/ThemedView';
 
 import { useRouter, Link } from 'expo-router';
 
