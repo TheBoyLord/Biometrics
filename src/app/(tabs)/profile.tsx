@@ -15,13 +15,14 @@ export default function HomeScreen() {
         <ThemedText type="title">Profile</ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Login</ThemedText>
-        <Button title="Log In" onPress={() => { router.push('/login'); } } />
-        <Link href="/login" asChild>
-         <Pressable>
-          <Text>Login</Text>
-         </Pressable>
-    </Link>
+        <ThemedText type="subtitle">Days</ThemedText>
+       
+
+        <Link href="/day2/onboarding" asChild><Button title="Day 2 - Onboarding" /></Link>
+        
+        <Link href="/day3" asChild><Button title="Day 3 - Not done" /></Link>
+        
+        
         <ThemedText type="subtitle">Register</ThemedText>
         <Button title="Register" onPress={() => { router.push('/register'); }} />
       </ThemedView>

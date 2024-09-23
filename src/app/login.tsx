@@ -6,6 +6,7 @@ import { ExternalLink } from '@components/ExternalLink';
 import ParallaxScrollView from '@components/ParallaxScrollView';
 import { ThemedText } from '@components/ThemedText';
 import { ThemedView } from '@components/ThemedView';
+import { Stack } from 'expo-router';
 
 
 import React, { useState } from 'react';
@@ -53,6 +54,7 @@ export default function LoginScreen() {
 
   return (
     <View>
+      <Stack.Screen options={{ title: 'Login Screen' }} />
       <Text>Login</Text>
       <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
       <TextInput placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
