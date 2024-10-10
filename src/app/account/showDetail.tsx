@@ -85,7 +85,7 @@ export default function ShowDetailScreen() {
           filteredBookmarkItems.map((bookmarkItem) => (
             <>
               <Address key={bookmarkItem.id} item={bookmarkItem}></Address>
-              <Team key={bookmarkItem.id+1000} item={bookmarkItem}></Team>
+              <Team key={bookmarkItem.id} item={bookmarkItem}></Team>
             </>
          ))
         ) : (
