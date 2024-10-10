@@ -1,69 +1,42 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+
+import { useState, useEffect, useCallback, useContext } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useState, useEffect } from 'react';
 import 'react-native-reanimated';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { useColorScheme } from '@hooks/useColorScheme';
-
+import { Text, View, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
+import * as SecureStore from 'expo-secure-store';
+
+import ThemedText from '@components/ThemedText';
+import ThemedView from '@components/ThemedView';
+import ThemedSafeAreaView from '@components/ThemedSafeAreaView';
+
+import { MultiDataProvider } from '@hooks/MultiDataContext';
 
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold, Inter_900Black } from '@expo-google-fonts/inter'; 
 import { 
   AmaticSC_400Regular, 
   AmaticSC_700Bold
 } from '@expo-google-fonts/amatic-sc'; 
+
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import { ThemeProvider} from '@hooks/ThemeContext';
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   //====================================================================================
   // Biometric functions
   //====================================================================================
-  const [deviceHasBiometric, setDeviceHasBiometric] = useState(false);
-  const [biometricsFound, setBiometricsFound] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [hasBiometricSupport, setHasBiometricSupport] = useState<boolean>(false);
+  const [passkey, setPasskey] = useState<string>('');
+  const [inputPasskey, setInputPasskey] = useState<string>('');
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  const checkDeviceForHardware = async () => {
-    let compatible = await LocalAuthentication.hasHardwareAsync();
-    if(compatible) {
-      setDeviceHasBiometric(true);
-      console.log('App:checkDeviceForHardware:true');
-      handleAuthentication();
-    } else {
-      setDeviceHasBiometric(false);
-      console.log('App:checkDeviceForHardware:false');
-    }
-  }
-  const checkForBiometrics = async () => {
-    let biometricRecords = await LocalAuthentication.isEnrolledAsync();
-    if(!biometricRecords) {
-      setBiometricsFound(false);
-      console.log('App:setBiometricsNotFound');
-    } else {
-      setBiometricsFound(true);
-      console.log('App:setBiometricsFound');
-    }
-  }
-  const handleAuthentication = async() => {
-    //this.props.navigation.navigate("HOME")
-    //  alert('navigate to welcome screen');
-    let result = await LocalAuthentication.authenticateAsync();
-    console.log("handleAuthentication");
-    console.log(result);
-    if(result.success) {
-      //handleLogin();
-      console.log('Face ID or Touch ID passed');
-      setIsAuthenticated(true);
-    } else {
-      console.log('Authentication Failed');
-      setIsAuthenticated(false);
-    }
-  }
-
-  let [fontsLoaded, fontError] = useFonts ({
+  // Load custom fonts
+  const [fontsLoaded, fontError] = useFonts ({
     Inter: Inter_400Regular,
     InterSemi: Inter_600SemiBold,
     InterBold: Inter_700Bold,
@@ -74,46 +47,152 @@ export default function RootLayout() {
 
   useEffect(() => {
     if(fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-      console.log('run on app init');
-      checkDeviceForHardware();
-      if(deviceHasBiometric) {
-        checkForBiometrics();
-      } else {
-        console.log('App:useEffect: NOT deviceHasBiometric');
-      }
-      if(biometricsFound) {
-        console.log('biometrics enabled and found');
-        handleAuthentication();
-      } else {
-        console.log('biometrics not found or not available');
-      }
-    }
+      handleLoadingComplete();
+    } 
   }, [fontsLoaded, fontError]);
 
+  // After fonts and assets are loaded, hide splash screen and check for biometric support
+  const handleLoadingComplete = useCallback(async () => {
+    await SplashScreen.hideAsync();
+      console.log('run on app init');
+      checkBiometricSupport();
+      // Trigger Face ID/Touch ID prompt
+      handleBiometricAuth();
+  }, []);
+
+  // Check if the device supports biometric authentication
+  const checkBiometricSupport = async () => {
+    const compatible = await LocalAuthentication.hasHardwareAsync();
+    const enrolled = await LocalAuthentication.isEnrolledAsync();
+    if(compatible && enrolled) {
+      setHasBiometricSupport(true);
+    } else {
+      setHasBiometricSupport(false);
+      Alert.alert(
+        'Biometric Authentication Unavailable',
+        'Your device does not support Face ID / Touch ID. You can use your passkey to log in instead.'
+      );
+    }
+  }
+  
+  // Authenticate using Face ID or Touch ID
+  const handleBiometricAuth = async () => {
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Authenticate with Face ID or Touch ID',
+      fallbackLabel: 'Use Passkey',
+    });
+
+    if (result.success) {
+      Alert.alert('Authenticated successfully!');
+      setIsAuthenticated(true);
+    } else {
+      Alert.alert('Authentication failed. You can use your passkey instead.');
+    }
+  };
+
+  // Handle passkey submission
+  const handlePasskeyAuth = async () => {
+    const savedPasskey = await SecureStore.getItemAsync('userPasskey');
+    if (savedPasskey === inputPasskey) {
+      Alert.alert('Passkey authenticated successfully!');
+      setIsAuthenticated(true);
+    } else {
+      Alert.alert('Incorrect passkey. Please try again.');
+    }
+  };
+
+  // Save passkey securely (e.g., during registration)
+  const savePasskey = async () => {
+    if (passkey) {
+      await SecureStore.setItemAsync('userPasskey', passkey);
+      Alert.alert('Passkey saved securely!');
+    }
+  };
+  
   if(!fontsLoaded && !fontError) {
     return null;
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>  
- 
- {/* {isAuthenticated ?  */}
+    <MultiDataProvider>
+      <ThemeProvider>
+        <ThemedSafeAreaView style={styles.safeArea}>
+        
+          {isAuthenticated ? (
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack>  
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>     
+          </GestureHandlerRootView>
+          ) : (
+          <ThemedView>
+            <ThemedText style={styles.titleText}>Login</ThemedText>
+            {hasBiometricSupport ? (
+              <>
+                <Button title="Login with Face ID / Touch ID" onPress={handleBiometricAuth} />
+                <ThemedText style={styles.orText}>OR</ThemedText>
+              </>
+            ) : (
+              <ThemedText style={styles.errorText}>Biometric authentication not supported.</ThemedText>
+            )}
+            {/* Passkey input */}
+            <TextInput
+              placeholder="Enter passkey"
+              secureTextEntry
+              style={styles.input}
+              value={inputPasskey}
+              onChangeText={setInputPasskey}
+            />
+            <Button title="Login with Passkey" onPress={handlePasskeyAuth} />
 
-  <Stack>  
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-{/* : 
+            {/* Save a new passkey */}
+            <TextInput
+              placeholder="Set new passkey"
+              secureTextEntry
+              style={styles.input}
+              value={passkey}
+              onChangeText={setPasskey}
+            />
+            <Button title="Save Passkey" onPress={savePasskey} />
+          </ThemedView>
+          )}
 
-      <View><Text style={styles.myStyle}>Not a valid pin</Text></View>}
-      */}
-    </ThemeProvider>
+        </ThemedSafeAreaView>
+      </ThemeProvider>
+    </MultiDataProvider>
   );
 }
 const styles = StyleSheet.create({
+  safeArea: {
+    justifyContent: 'center',
+    flex: 1,
+  },
   myStyle: {
     fontFamily: 'AmaticBold',
   },
-  
+  titleText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+  orText: {
+    marginVertical: 15,
+    fontSize: 18,
+    color: '#666',
+  },
+  input: {
+    height: 40,
+    width: '80%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    backgroundColor: '#fff',
+  },
+  errorText: {
+    color: 'red',
+  }
 });

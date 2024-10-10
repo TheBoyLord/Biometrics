@@ -1,70 +1,194 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { useContext } from 'react';
+import { ThemeContext } from '@hooks/ThemeContext';
+import { useRouter } from "expo-router";
+import { Text, View, StyleSheet, TouchableOpacity, ActivityIndicator, Pressable} from 'react-native';
 
-import { HelloWave } from '@components/HelloWave';
-import ParallaxScrollView from '@components/ParallaxScrollView';
-import { ThemedText } from '@components/ThemedText';
-import { ThemedView } from '@components/ThemedView';
+import { Colors } from '@constants/Colors';
+import ThemedText from '@components/ThemedText';
+import ThemedView from '@components/ThemedView';
+import ThemedStatusBar from '@components/ThemedStatusBar';
+import ThemedFlatList from '@components/ThemedFlatList';
+
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faCheck, faChevronRight } from '@fortawesome/pro-regular-svg-icons'; 
+
+// import useFetch from '@hooks/useFetch';
+import { useMultiDataContext } from '@hooks/MultiDataContext';
+
+import AccountSummary from '@components/AccountSummary';
 
 export default function HomeScreen() {
+  const { theme } = useContext(ThemeContext); // Get the current theme from context
+  const { accountItems, loading, error } = useMultiDataContext();
+  const router = useRouter();
+
+  // Render functions for different data types
+  const renderAccountItem = ({ item }: any) => (
+    <ThemedView>
+      <TouchableOpacity
+        key={item.id}
+        onPress={() => {
+          router.push({
+            pathname: "/account/showDetail", 
+            params: { accountCode: item.ddAccountNumber },
+          });
+        }}>
+        <AccountSummary item={item}></AccountSummary>
+      </TouchableOpacity>
+    </ThemedView>
+  );
+
+  const onSetupDD = () => {
+    router.push({
+      pathname: "/account/setupGoCardless",  // Explicitly specify the pathname
+    });
+  };
+
+  // Handle loading state
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.error}>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  // Handle successful fetch
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('../../../assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ThemedView style={styles.safeArea}>
+      <ThemedStatusBar />
+     
+        <ThemedView style={styles.container} >  
+          <ThemedView style={styles.titleContainer} >  
+            <ThemedText style={styles.title}>My Accounts</ThemedText>
+          </ThemedView>
+
+          <ThemedView style={styles.subTitleContainer} >  
+        
+            <ThemedFlatList style={{gap: 8 }}
+              data={accountItems}
+              renderItem={renderAccountItem}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}  // Add a separator between items
+              keyExtractor={(item) => item.id.toString()}  // Ensure each item has a unique key
+              ListHeaderComponent={() => (
+                <ThemedView style={styles.boxContainer}>
+                  <ThemedView style={[styles.box, {backgroundColor: theme.shadeColor}]}>
+                    <TouchableOpacity
+                    key={1}
+                    onPress={() => { 
+                      router.push({
+                        pathname: "/account/approvalRequest",  // Explicitly specify the pathname
+                      });
+                    }}>
+                      <ThemedView style={[styles.approvalRow, {backgroundColor: theme.shadeColor}]}>
+                        <ThemedView style={[styles.approvalLeftSection, {backgroundColor: theme.shadeColor}]}>
+                          <FontAwesomeIcon icon={faCheck} size={20} color={theme.tintColor} />
+                          <ThemedText style={styles.approvalText}>Approval requests</ThemedText>
+                        </ThemedView>
+                        <FontAwesomeIcon style={styles.approvalIconRight} icon={faChevronRight} size={20} color={theme.tintColor} />
+                      </ThemedView>
+                  </TouchableOpacity>
+                  </ThemedView>
+                </ThemedView>
+              )}
+            />
+          
+          </ThemedView>
+          
+          <ThemedView style={[styles.boxContainer, {flexDirection: 'row', flex: 1, justifyContent: 'center', alignItems: 'flex-end'}]}>
+            <Pressable onPress={onSetupDD} style={[styles.btnStd, {backgroundColor:Colors.dark.jrRed}]}>
+              <ThemedText style={styles.btnStdText}>Set up GoCardless DD</ThemedText>
+            </Pressable>
+          </ThemedView>
+        
+        </ThemedView>
+        
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    justifyContent: 'center',
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    padding: 10,
+    marginLeft: 5,
+    marginRight: 5,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    lineHeight: 32,
+    marginTop: 16,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  subTitleContainer: {
+    padding: 10,
   },
+  subtitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  boxContainer: {
+    paddingTop: 10,
+    paddingBottom: 20,  
+  },
+  box: {
+    borderRadius: 10,
+    padding: 10,
+    marginLeft: 5,
+    marginRight: 5,
+  },
+  separator: {
+    height: 20,  // Adjust the height for vertical spacing
+  },
+  error: {
+    color: 'red',
+  },
+  approvalRow: {
+    flexDirection: 'row',  // Arrange items horizontally
+    justifyContent: 'space-between',  // Space between items (left and right)
+    alignItems: 'center',  // Vertically align items in the center
+    padding: 10,
+  },
+  approvalLeftSection: {
+    flexDirection: 'row',  // Horizontal arrangement for the icon and text
+    alignItems: 'center',  // Vertically center align the icon and text
+  },
+  approvalIconLeft: {
+    //marginLeft: 'auto',  // Push the right icon to the far right
+  },
+  approvalText: {
+    fontWeight: 'bold',
+    marginLeft: 10,  // Add some space between the icons and text
+  },
+  approvalIconRight: {
+    marginLeft: 'auto',  // Push the right icon to the far right
+  },
+  btnStd: {
+    borderRadius: 50,
+    alignItems: 'center',
+    //flex: 1,
+    marginLeft: 10,
+    marginRight: 10,
+  },
+  btnStdText: {
+    color: '#FDFDFD',
+    fontFamily: 'InterSemi',
+    fontSize: 16,
+    padding: 15,
+    paddingHorizontal: 25,
+  },
+  
 });

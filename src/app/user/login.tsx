@@ -1,11 +1,3 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform } from 'react-native';
-
-import { Collapsible } from '@components/Collapsible';
-import { ExternalLink } from '@components/ExternalLink';
-import ParallaxScrollView from '@components/ParallaxScrollView';
-import { ThemedText } from '@components/ThemedText';
-import { ThemedView } from '@components/ThemedView';
 import { Stack } from 'expo-router';
 
 
@@ -58,7 +50,7 @@ export default function LoginScreen() {
       <Text>Login</Text>
       <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
       <TextInput placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
-      <Button title="Log In" onPress={() => { router.push('/home'); } } />
+      <Button title="Log In" onPress={() => { router.push('/(tabs)'); } } />
       <Button title="Log In with Biometric" onPress={authenticate} />
     </View>
   );

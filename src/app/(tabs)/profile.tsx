@@ -1,49 +1,79 @@
-import { StatusBar } from 'expo-status-bar';
-import { Platform, Pressable, Text, View, Button, StyleSheet } from 'react-native';
 
-import { ThemedText } from '@components/ThemedText';
-import { ThemedView } from '@components/ThemedView';
-
+import { StyleSheet } from 'react-native';
 import { useRouter, Link } from 'expo-router';
+import SvgJRCA from '@components/icons/SvgJRCA';
 
-export default function HomeScreen() {
+import { useContext } from 'react';
+import { ThemeContext } from '@hooks/ThemeContext';
+
+import ThemedText from '@components/ThemedText';
+import ThemedView from '@components/ThemedView';
+import ThemedSafeAreaView from '@components/ThemedSafeAreaView';
+import ThemedStatusBar from '@components/ThemedStatusBar';
+
+const ProfileScreen = () => {
+  const { theme } = useContext(ThemeContext); // Get the current theme from context
+
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Profile</ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Days</ThemedText>
-       
+    <ThemedSafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
 
-        <Link href="/day2/onboarding" asChild><Button title="Day 2 - Onboarding" /></Link>
-        
-        <Link href="/day3" asChild><Button title="Day 3 - Not done" /></Link>
-        
-        
-        <ThemedText type="subtitle">Register</ThemedText>
-        <Button title="Register" onPress={() => { router.push('/register'); }} />
-      </ThemedView>
+      <ThemedStatusBar />
+      
+      <ThemedView style={styles.container} >  
+        <ThemedView style={styles.titleContainer} >  
+          <ThemedText style={styles.title}>Profile</ThemedText>
+        </ThemedView>
 
-    </View>
+        <ThemedView>  
+          <ThemedText style={styles.subtitle}>Days</ThemedText>
+          <Link style={styles.link} href="/day2/onboarding">day2 - Onboarding</Link>
+          <Link style={styles.link} href="/day2/lottie">day2 - lottie Animarions</Link>
+          <Link style={styles.link} href="/screens/day3/authentication">day3 - Authentication</Link>
+          <Link style={styles.link} href="/user/theme">user/theme - App theme Settings</Link>
+          <ThemedText>DOES THIS HAVE THE CORRECT STYLE</ThemedText>
+          <ThemedText>Here is a custom svg created from a standard SVG converted via SVGR (web) and export to react-native:</ThemedText>
+          <SvgJRCA width={200} height={200} fill="#a0a0a0" />
+          
+          <ThemedText style={styles.subtitle}>Register</ThemedText>
+        
+          <Link style={styles.link} href="/user/login">Login</Link>
+          <Link style={styles.link} href="/user/register">Register</Link>
+        
+        </ThemedView>
+
+      </ThemedView>
+    </ThemedSafeAreaView>
   );
 }
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    justifyContent: 'center',
+    flex: 1,
+  },
   container: {
     flex: 1,
-    //alignItems: 'center',
     justifyContent: 'center',
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    lineHeight: 32,
+  },
+  subtitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  link: {
+    lineHeight: 30,
+    fontSize: 16,
+    color: '#0a7ea4',
   },
 });

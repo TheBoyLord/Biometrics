@@ -3,12 +3,14 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
+    "jsx": "react-jsx",
     "paths": {
       "@/*": ["src/*"],
       "@assets/*": ["/assets/*"],
       "@components/*": ["src/components/*"],
       "@constants/*": ["src/constants/*"],
-      "@hooks/*": ["src/hooks/*"]
+      "@hooks/*": ["src/hooks/*"],
+      "@animations/*": ["/assets/animations/*"]
     }
   },
   "include": [
@@ -16,5 +18,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "src/components/svg_jrca.js", "src/components/data/getBalances.js"  ]
 }
