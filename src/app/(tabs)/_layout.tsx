@@ -1,8 +1,6 @@
 import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import { useContext } from 'react';
-
-import { Colors } from '@constants/Colors';
 import { useColorScheme } from '@hooks/useColorScheme';
 // FontAwesome Icons
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -12,26 +10,21 @@ import { ThemeContext } from '@hooks/ThemeContext';
 
 const TabLayout = () => {
   const colorScheme = useColorScheme();
-
   const { theme } = useContext(ThemeContext); // Get the current theme from context
 
   return (
     <Tabs
-      // screenOptions={{
-      //   tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tintColor,
-      //   headerShown: false,
-      // }}
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: theme.tabBarBackgroundColor, // Background color for the tab bar
+          backgroundColor: theme.tabBarBackgroundColor,
         },
-        tabBarActiveTintColor: theme.tabBarActiveTintColor, // Active tab text/icon color
-        tabBarInactiveTintColor: theme.tabBarInactiveTintColor, // Inactive tab text/icon color
+        tabBarActiveTintColor: theme.tabBarActiveTintColor,
+        tabBarInactiveTintColor: theme.tabBarInactiveTintColor,
         headerStyle: {
-          backgroundColor: theme.backgroundColor, // Set the header background color
+          backgroundColor: theme.backgroundColor,
         },
         headerTitleStyle: {
-          color: theme.textColor, // Set the header text color
+          color: theme.textColor,
         },
         headerShown: false,
       }}>

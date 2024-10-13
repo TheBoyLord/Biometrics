@@ -6,10 +6,7 @@ import { StyleSheet, Pressable } from 'react-native';
 import { Colors } from '@constants/Colors';
 import { useColorScheme } from '@hooks/useColorScheme';
 
-import ThemedText from '@/components/ThemedText';
-import ThemedView from '@components/ThemedView';
-import ThemedSafeAreaView from "@components/ThemedSafeAreaView";
-import ThemedStatusBar from "@components/ThemedStatusBar";
+import { ThemedText, ThemedView, ThemedSafeAreaView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
 
 import { GestureDetector, Gesture, Directions } from "react-native-gesture-handler";
 import Animated,  { FadeIn, FadeOut, SlideInRight, SlideInLeft, SlideOutLeft, SlideOutRight } from 'react-native-reanimated';

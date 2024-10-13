@@ -1,33 +1,39 @@
 import { useContext } from 'react';
 import { Stack, useLocalSearchParams } from "expo-router";
 import { TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-
-import ThemedStatusBar from '@components/ThemedStatusBar';
-import Animated,  { FadeIn, FadeOut} from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native'; 
+import { useRouter } from "expo-router";
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faFilePen } from '@fortawesome/free-solid-svg-icons'; 
 import { faArrowLeft } from '@fortawesome/pro-regular-svg-icons'; 
-import { useNavigation } from '@react-navigation/native'; 
+import { faFilePdf } from '@fortawesome/pro-regular-svg-icons'; 
+
 
 import { ThemeContext } from '@hooks/ThemeContext';
-import ThemedText from '@components/ThemedText';
-import ThemedView from '@components/ThemedView';
-import ThemedSafeAreaView from '@components/ThemedSafeAreaView';
+import { ThemedText, ThemedView, ThemedSafeAreaView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
 
 import { useMultiDataContext } from '@hooks/MultiDataContext';
+
 import AccountSummary from '@components/AccountSummary';
 import Address from '@components/Address';
 import Team from '@components/Team';
+import ActionBox from '@components/ActionBox';
 
 export default function ShowDetailScreen() {
   const { accountItems, bookmarkItems, loading, error } = useMultiDataContext();
   const { theme } = useContext(ThemeContext); // Get the current theme from context
   const navigation = useNavigation(); 
   const { accountCode } = useLocalSearchParams();  // Retrieve the query parameters
-  const formatToPound = (amount: number): string => {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(amount);
+
+  const router = useRouter();
+
+  const handleShowStatement = (accountCode: string) => {
+    router.push({
+      pathname: "/account/showStatement", 
+      params: {accountCode},
+    });
   };
+
   // Handle loading state
   if(loading) {
     return (
@@ -74,6 +80,7 @@ export default function ShowDetailScreen() {
         }} 
       />
       <ThemedView style={styles.pageContent} >  
+       
         {filteredAccountItems && filteredAccountItems.length > 0 ? (
           filteredAccountItems.map((accountItem) => (
             <AccountSummary key={accountItem.id} item={accountItem}></AccountSummary>
@@ -81,12 +88,17 @@ export default function ShowDetailScreen() {
         ) : (
           <ThemedText style={ styles.noDataFound }>No details found for this account code.</ThemedText>  // Display a message if no results match the filter
         )}
+        
+        <TouchableOpacity onPress={() => handleShowStatement(`${accountCode}`) } >
+          <ActionBox icon={faFilePdf} text="Show statement" />
+        </TouchableOpacity>
+
         {filteredBookmarkItems && filteredBookmarkItems.length > 0 ? (
           filteredBookmarkItems.map((bookmarkItem) => (
-            <>
-              <Address key={bookmarkItem.id} item={bookmarkItem}></Address>
-              <Team key={bookmarkItem.id} item={bookmarkItem}></Team>
-            </>
+             <ThemedView key={bookmarkItem.id} style={{gap: 10}}>        
+              <Address item={bookmarkItem}></Address>
+              <Team item={bookmarkItem}></Team>
+            </ThemedView>
          ))
         ) : (
           <ThemedText style={ styles.noDataFound }>No details found for this account code.</ThemedText>  // Display a message if no results match the filter

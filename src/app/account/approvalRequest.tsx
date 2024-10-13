@@ -2,9 +2,6 @@ import { useContext } from 'react';
 import { Stack } from "expo-router";
 import { TouchableOpacity, StyleSheet } from 'react-native';
 
-import { Colors } from '@constants/Colors';
-
-import ThemedStatusBar from '@components/ThemedStatusBar';
 import Animated,  { FadeIn, FadeOut} from 'react-native-reanimated';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -13,9 +10,8 @@ import { faArrowLeft } from '@fortawesome/pro-regular-svg-icons';
 import { useNavigation } from '@react-navigation/native'; 
 
 import { ThemeContext } from '@hooks/ThemeContext';
-import ThemedText from '@components/ThemedText';
-import ThemedView from '@components/ThemedView';
-import ThemedSafeAreaView from '@components/ThemedSafeAreaView';
+import { ThemedText, ThemedView, ThemedSafeAreaView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
+
 
 export default function ApprovalRequestScreen() {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
@@ -75,7 +71,6 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     fontSize: 24,
-    paddingTop: 24,
   },
   description: {
     textAlign: 'center',

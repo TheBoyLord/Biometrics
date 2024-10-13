@@ -8,8 +8,8 @@ import { faMoonStars } from '@fortawesome/pro-solid-svg-icons';
 // App Storage
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // Theme
-import ThemedText from '@components/ThemedText';
-import ThemedView from '@components/ThemedView';
+import ThemedText from '@/components/Themed/ThemedText';
+import ThemedView from '@/components/Themed/ThemedView';
 import { ThemeContext } from '@hooks/ThemeContext';
 
 const ThemeSelector = () => {

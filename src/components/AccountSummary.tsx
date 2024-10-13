@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { useContext } from 'react';
 import { ThemeContext } from '@hooks/ThemeContext';
-import ThemedText from '@components/ThemedText';
-import ThemedView from '@components/ThemedView';
+import ThemedText from '@/components/Themed/ThemedText';
+import ThemedView from '@/components/Themed/ThemedView';
 
 const formatToPound = (amount: number): string => {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(amount);

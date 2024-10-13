@@ -1,21 +1,16 @@
 import { useContext } from 'react';
 import { ThemeContext } from '@hooks/ThemeContext';
 import { useRouter } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, ActivityIndicator, Pressable} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Pressable} from 'react-native';
 
 import { Colors } from '@constants/Colors';
-import ThemedText from '@components/ThemedText';
-import ThemedView from '@components/ThemedView';
-import ThemedStatusBar from '@components/ThemedStatusBar';
-import ThemedFlatList from '@components/ThemedFlatList';
+import { ThemedText, ThemedView, ThemedFlatList } from '@/components/Themed/ThemedComponents';
+import { faCheck } from '@fortawesome/pro-regular-svg-icons'; 
 
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCheck, faChevronRight } from '@fortawesome/pro-regular-svg-icons'; 
-
-// import useFetch from '@hooks/useFetch';
 import { useMultiDataContext } from '@hooks/MultiDataContext';
 
 import AccountSummary from '@components/AccountSummary';
+import ActionBox from '@components/ActionBox';
 
 export default function HomeScreen() {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
@@ -38,6 +33,12 @@ export default function HomeScreen() {
     </ThemedView>
   );
 
+  const onApprovalRequests = () => {
+    router.push({
+      pathname: "/account/approvalRequest", 
+    });
+  };
+
   const onSetupDD = () => {
     router.push({
       pathname: "/account/setupGoCardless",  // Explicitly specify the pathname
@@ -52,78 +53,55 @@ export default function HomeScreen() {
   // Handle error state
   if (error) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.error}>Error: {error}</Text>
-      </View>
+      <ThemedView style={styles.container}>
+        <ThemedText style={styles.error}>Error: {error}</ThemedText>
+      </ThemedView>
     );
   }
 
   // Handle successful fetch
   return (
     <ThemedView style={styles.safeArea}>
-      <ThemedStatusBar />
-     
-        <ThemedView style={styles.container} >  
-          <ThemedView style={styles.titleContainer} >  
-            <ThemedText style={styles.title}>My Accounts</ThemedText>
-          </ThemedView>
-
-          <ThemedView style={styles.subTitleContainer} >  
-        
-            <ThemedFlatList style={{gap: 8 }}
-              data={accountItems}
-              renderItem={renderAccountItem}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}  // Add a separator between items
-              keyExtractor={(item) => item.id.toString()}  // Ensure each item has a unique key
-              ListHeaderComponent={() => (
-                <ThemedView style={styles.boxContainer}>
-                  <ThemedView style={[styles.box, {backgroundColor: theme.shadeColor}]}>
-                    <TouchableOpacity
-                    key={1}
-                    onPress={() => { 
-                      router.push({
-                        pathname: "/account/approvalRequest",  // Explicitly specify the pathname
-                      });
-                    }}>
-                      <ThemedView style={[styles.approvalRow, {backgroundColor: theme.shadeColor}]}>
-                        <ThemedView style={[styles.approvalLeftSection, {backgroundColor: theme.shadeColor}]}>
-                          <FontAwesomeIcon icon={faCheck} size={20} color={theme.tintColor} />
-                          <ThemedText style={styles.approvalText}>Approval requests</ThemedText>
-                        </ThemedView>
-                        <FontAwesomeIcon style={styles.approvalIconRight} icon={faChevronRight} size={20} color={theme.tintColor} />
-                      </ThemedView>
-                  </TouchableOpacity>
-                  </ThemedView>
-                </ThemedView>
-              )}
-            />
-          
-          </ThemedView>
-          
-          <ThemedView style={[styles.boxContainer, {flexDirection: 'row', flex: 1, justifyContent: 'center', alignItems: 'flex-end'}]}>
-            <Pressable onPress={onSetupDD} style={[styles.btnStd, {backgroundColor:Colors.dark.jrRed}]}>
-              <ThemedText style={styles.btnStdText}>Set up GoCardless DD</ThemedText>
-            </Pressable>
-          </ThemedView>
-        
+      
+      <ThemedView style={styles.container} >  
+        <ThemedView style={styles.titleContainer} >  
+          <ThemedText style={styles.title}>My Accounts</ThemedText>
         </ThemedView>
-        
+        <ThemedView style={styles.listContainer}>
+          <ThemedFlatList 
+            data={accountItems}
+            renderItem={renderAccountItem}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}  // Add a separator between items
+            keyExtractor={(item) => item.id.toString()}  // Ensure each item has a unique key
+            ListHeaderComponent={() => (
+              <TouchableOpacity onPress={() => onApprovalRequests() } >
+                <ActionBox icon={faCheck} text="Approval requests" />
+              </TouchableOpacity>
+            )}    
+            ListEmptyComponent={<ThemedText>No items available</ThemedText>} 
+            contentContainerStyle={styles.flatListContent}
+          />
+        </ThemedView>  
+        <ThemedView style={styles.footerContainer}>
+          <Pressable onPress={onSetupDD} style={[styles.btnStd, {backgroundColor:Colors.dark.jrRed}]}>
+            <ThemedText style={styles.btnStdText}>Set up GoCardless DD</ThemedText>
+          </Pressable>
+        </ThemedView>
+      </ThemedView>        
     </ThemedView>
   );
 }
-
 const styles = StyleSheet.create({
   safeArea: {
-    justifyContent: 'center',
     flex: 1,
   },
   container: {
     flex: 1,
+    padding: 10,
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
     marginLeft: 5,
     marginRight: 5,
   },
@@ -133,53 +111,27 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     marginTop: 16,
   },
-  subTitleContainer: {
-    padding: 10,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  boxContainer: {
-    paddingTop: 10,
-    paddingBottom: 20,  
-  },
-  box: {
-    borderRadius: 10,
-    padding: 10,
-    marginLeft: 5,
-    marginRight: 5,
+  listContainer: {
+    flex: 1,  // Ensures the FlatList takes up available space
   },
   separator: {
-    height: 20,  // Adjust the height for vertical spacing
+    height: 20, // Adjust the height for vertical spacing
   },
   error: {
     color: 'red',
   },
-  approvalRow: {
-    flexDirection: 'row',  // Arrange items horizontally
-    justifyContent: 'space-between',  // Space between items (left and right)
-    alignItems: 'center',  // Vertically align items in the center
+  footerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     padding: 10,
-  },
-  approvalLeftSection: {
-    flexDirection: 'row',  // Horizontal arrangement for the icon and text
-    alignItems: 'center',  // Vertically center align the icon and text
-  },
-  approvalIconLeft: {
-    //marginLeft: 'auto',  // Push the right icon to the far right
-  },
-  approvalText: {
-    fontWeight: 'bold',
-    marginLeft: 10,  // Add some space between the icons and text
-  },
-  approvalIconRight: {
-    marginLeft: 'auto',  // Push the right icon to the far right
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   btnStd: {
     borderRadius: 50,
     alignItems: 'center',
-    //flex: 1,
     marginLeft: 10,
     marginRight: 10,
   },
@@ -190,5 +142,15 @@ const styles = StyleSheet.create({
     padding: 15,
     paddingHorizontal: 25,
   },
-  
+  flatListContent: {
+    flexGrow: 1, // Makes FlatList content grow to fill the screen
+    justifyContent: 'flex-start', // Ensure the items are packed at the top
+    paddingBottom: 100, // Give some space for the footer
+  },
+  flatListFooter: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center', // Center the content inside the footer
+  },
+
 });

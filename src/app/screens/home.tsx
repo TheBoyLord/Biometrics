@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, StyleSheet} from 'react-native';
-import { ThemedText } from '@/components/ZZZ_ThemedText';
-import { ThemedView } from '@components/ThemedView';
+
+import { ThemedText, ThemedView } from '@/components/Themed/ThemedComponents';
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">HOME</ThemedText>
+        <ThemedText>HOME</ThemedText>
       </ThemedView>
     </View>
   );

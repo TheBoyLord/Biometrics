@@ -1,5 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView, ActivityIndicator, FlatList } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useContext } from 'react';
 import { ThemeContext } from '@hooks/ThemeContext';
 
@@ -9,7 +8,7 @@ export default function TabTwoScreen() {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
  
   // Call the custom hook with the API URL
-  const { data, loading, error } = useFetch('https://marketingtest.jacrox.cloud/api/testJson.php?mode=2&clientCode=LOR010');
+  const { data, loading, error } = useFetch('https://internaltest.jacrox.cloud/api/mobAction.php?page=statements/createPDF&params=LOR010|0|1');
 
   // Handle loading state
   if(loading) {
@@ -28,24 +27,13 @@ export default function TabTwoScreen() {
       </View>
     );
   }
-
+  console.log('from explore: ', data);
   // Handle successful data fetch
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Fetched Data:</Text>
-
-      {/* FlatList to render the fetched data */}
-      <FlatList
-        data={data}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.title}>addr1: {item.addressLine1}</Text>
-            <Text style={styles.title}>addr2: {item.addressLine2}</Text>
-          </View>
-        )}
-        keyExtractor={(item) => item.id.toString()}  // Ensure each item has a unique key
-      />
-    </View>
+      
+   </View>
   );
 };
 

@@ -3,13 +3,11 @@ import { useState, useEffect, useCallback, useContext } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
-import { Text, View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { TextInput, Button, StyleSheet, Alert } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 
-import ThemedText from '@components/ThemedText';
-import ThemedView from '@components/ThemedView';
-import ThemedSafeAreaView from '@components/ThemedSafeAreaView';
+import { ThemedText, ThemedView, ThemedSafeAreaView } from '@/components/Themed/ThemedComponents';
 
 import { MultiDataProvider } from '@hooks/MultiDataContext';
 

@@ -1,10 +1,8 @@
 import { useContext } from 'react';
 import { Stack } from "expo-router";
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity, StyleSheet, Alert, Pressable } from 'react-native';
+import * as Linking from 'expo-linking';
 
-import { Colors } from '@constants/Colors';
-
-import ThemedStatusBar from '@components/ThemedStatusBar';
 import Animated,  { FadeIn, FadeOut} from 'react-native-reanimated';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -13,29 +11,38 @@ import { faArrowLeft } from '@fortawesome/pro-regular-svg-icons';
 import { useNavigation } from '@react-navigation/native'; 
 
 import { ThemeContext } from '@hooks/ThemeContext';
-import ThemedText from '@components/ThemedText';
-import ThemedView from '@components/ThemedView';
-import ThemedSafeAreaView from '@components/ThemedSafeAreaView';
+import { ThemedText, ThemedView, ThemedSafeAreaView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
 
 export default function SetupGoCardlessScreen() {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
   const navigation = useNavigation(); 
+
+  const onSetupGoCardless = async () => {
+    const url: string = 'https://jrx.to.ddebits';
+    try {
+      // Check if the URL can be opened
+      const supported: boolean = await Linking.canOpenURL(url);
+      if(supported) {
+        // Open the link with the default browser
+        await Linking.openURL(url);
+      } else {
+        Alert.alert(`Don't know how to open this URL: ${url}`);
+      }
+    } catch (error: any) {
+      Alert.alert('Failed to open the URL:', error.message);
+    }
+  };
+
 return (
- 
     <ThemedSafeAreaView style={styles.page}>
       <ThemedStatusBar />
       <Stack.Screen options={{ 
         headerShown: true, 
-        headerStyle: {
-          backgroundColor: theme.headerBackgroundColor, // Set the background color of the header based on the theme
-        },
-        headerTintColor: theme.headerTextColor, // Set the text color of the header
-        contentStyle: {
-          backgroundColor: theme.backgroundColor, // Set the background color for the entire screen
-        },
+        headerStyle: { backgroundColor: theme.headerBackgroundColor },
+        headerTintColor: theme.headerTextColor,
+        contentStyle: { backgroundColor: theme.backgroundColor },
         headerTitleStyle: { color: theme.textColor },  
         title: 'GoCardless', 
-        //headerBackTitle: 'Back',
         headerLeft: () => (
           <TouchableOpacity onPress={() => navigation.goBack()} >
             <FontAwesomeIcon icon={faArrowLeft} size={24} color={theme.headerBackColor} />
@@ -45,12 +52,27 @@ return (
       />
      
       <ThemedView style={styles.pageContent} >  
-        <Animated.View entering={FadeIn.duration(1500)} exiting={FadeOut}>
-          <FontAwesomeIcon style={styles.image} icon={faMoneyBillTransfer} size={100} color={theme.jrRed} />
-        </Animated.View>
+        <>
+          <Animated.View entering={FadeIn.duration(1500)} exiting={FadeOut}>
+            <FontAwesomeIcon style={styles.image} icon={faMoneyBillTransfer} size={100} color={theme.jrRed} />
+          </Animated.View>
 
-        <ThemedText style={ styles.title }>Setup GoCardless</ThemedText>
-        <ThemedText style={ styles.description }>Use this screen to configure all details for GoCardless</ThemedText>
+          <ThemedText style={ styles.title }>Setup GoCardless</ThemedText>
+          <ThemedText style={ styles.textHeader }>What is GoCardless?</ThemedText>
+          <ThemedText style={ styles.textDetail }>{`\u2022`} GoCardless is a service that helps you make payments automatically through Direct Debit.</ThemedText>
+          <ThemedText style={ styles.textDetail }>{`\u2022`} It's an easy way to manage regular payments like subscriptions or invoices.</ThemedText>
+          <ThemedText style={ styles.textHeader }>Benefits of GoCardless to Customers:</ThemedText>
+          <ThemedText style={ styles.textDetail }>{`\u2022`} Convenience: No need to remember payment due dates or manually transfer money.</ThemedText>
+          <ThemedText style={ styles.textDetail }>{`\u2022`} Security: GoCardless uses bank-level encryption to keep your details safe.</ThemedText>
+          <ThemedText style={ styles.textDetail }>{`\u2022`} Control: You’ll be notified before each payment is taken, and you can cancel any time.</ThemedText>
+          <ThemedText style={ styles.textDetail }>{`\u2022`} No Card Needed: No worries about expired or lost cards; payments come directly from your bank.</ThemedText>
+        </>
+
+        <ThemedView style={styles.footerContainer}>
+          <Pressable onPress={onSetupGoCardless} style={[styles.btnStd, {backgroundColor:theme.jrRed}]}>
+            <ThemedText style={styles.btnStdText}>Complete GoCardless set up</ThemedText>
+          </Pressable>
+        </ThemedView>
        
       </ThemedView>
      
@@ -75,11 +97,43 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     fontSize: 24,
-    paddingTop: 24,
+    marginBottom: 10,
   },
   description: {
     textAlign: 'center',
     fontSize: 16,
     paddingTop: 16,
+  },
+  textHeader: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    lineHeight: 18,
+    marginTop: 5,
+  },
+  textDetail: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  btnStd: {
+    borderRadius: 50,
+    alignItems: 'center',
+    marginLeft: 10,
+    marginRight: 10,
+  },
+  btnStdText: {
+    color: '#FDFDFD',
+    fontFamily: 'InterSemi',
+    fontSize: 16,
+    padding: 15,
+    paddingHorizontal: 25,
+  },
+  footerContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })

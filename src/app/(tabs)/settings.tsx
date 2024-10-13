@@ -8,9 +8,7 @@ import { faAngleRight } from '@fortawesome/pro-regular-svg-icons';
 import { useNavigation } from '@react-navigation/native'; 
 
 import { ThemeContext } from '@hooks/ThemeContext';
-import ThemedText from '@components/ThemedText';
-import ThemedView from '@components/ThemedView';
-import ThemedStatusBar from '@components/ThemedStatusBar';
+import { ThemedText, ThemedView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
 
 const SettingsScreen = () => {
   const { theme } = useContext(ThemeContext); // Get the current theme from context

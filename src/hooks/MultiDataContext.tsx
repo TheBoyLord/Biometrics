@@ -99,6 +99,88 @@ interface BookmarkItem {
   practiceManagerEmail: string;
 }
 
+interface ContactItem {
+  id: number;	
+  ContactID: string;	
+  ClientID: number;	
+  FullName: string;	
+  PartnerName: string;	
+  CompanyName: string;	
+  DepartmentName: string;	
+  OfficeName: string;	
+  Entity: string;	
+  MailingName: string;	
+  Prefix: string;	
+  FirstName: string;	
+  LastName: string;	
+  Salutation: string;	
+  MiddleName: string;	
+  Suffix: string;	
+  Gender: string;	
+  DateOfBirth: string;	
+  BirthPlace: string;	
+  DateOfDeath: string;	
+  Initials: string;	
+  NINumber: string;	
+  UTR: string;	
+  PPSN: string;	
+  HMRCR40: string;	
+  OurRef: string;	
+  Draft: number;	
+  ApprovedBy: string;	
+  BusinessType: string;	
+  CreatedBy: string;	
+  DateCreated: string;	
+  Address1: string;	
+  Address2: string;	
+  Address3: string;	
+  Town: string;	
+  County: string;	
+  Country: string;	
+  PostCode: string;	
+  Email: string;	
+  CheckedOutDate: string;	
+  CheckedOutBy: string;	
+  ContactClosed: number;	
+  ClosedReason: string;	
+  ContactLastModified: string;	
+  Fax: string;	
+  Mobile: string;	
+  contacttype: string;	
+  CodeName: string;	
+  RestrictedClientTeamAccess: number;
+}
+
+interface ClientItem {
+  Id: number;
+  ClientID: number;
+  ContactID: number;
+  ParentName: string;
+  ClientCode: string;
+  CreatedDate: string;
+  PeriodEndDate: string;
+  BecameClient: string;
+  ClientClosed: number;
+  ClosedDate: string;
+  CompanyRegistrationNo: string;
+  CompanyTaxReference: string;
+  ClosedReason: string;
+  Draft: number;
+  ApprovedBy: string;
+  WonReason: string;
+  yearend: string;
+  ClientSupplierType: string; 
+}
+
+interface TeamItem {
+  id: number;
+  ContactId: number;
+  ResponsibilityTypeID: number;
+  ContactTeamId: number;
+  EmployeeID: number;
+  Description: string;
+  fullName: string;
+}
 // Define the structure of the context
 interface MultiDataContextType {
   accountItems: AccountItem[] | null;
@@ -130,25 +212,51 @@ export const MultiDataProvider = ({ children }: { children: ReactNode }) => {
       try {
         // Step 1: Use Promise.all to fetch data concurrently
         const [accountItemsResponse, bookmarkItemsResponse] = await Promise.all([
-          fetch('https://marketingtest.jacrox.cloud/api/testJson.php?mode=1&clientCode=LOR010,PRO200'),  // Replace with actual user API
-          fetch('https://marketingtest.jacrox.cloud/api/testJson.php?mode=2&clientCode=LOR010,PRO200'),  // Replace with actual product API
+          fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=1&clientCode=LOR010,PRO200'),  
+          fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=2&clientCode=LOR010,PRO200'),
+          // fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=3&contactId=1796,1343'),
+          // fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=4&contactId=1796,1343'),
+          // fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=5&contactId=1796,1343'),
         ]);
-
-        // Step 2: Parse responses
-        const accountItemsData: AccountItem[] = await accountItemsResponse.json();
-        const bookmarkItemsData: BookmarkItem[] = await bookmarkItemsResponse.json();
-
-        // Step 3: Set data in state
+        //
+        // Read accountItemsResponse as text first, then try to parse it
+        //
+        const accountItemsText = await accountItemsResponse.text();
+        //console.log("Raw Account Items Response:", accountItemsText);
+        let accountItemsData: AccountItem[] = [];
+        try {
+          accountItemsData = JSON.parse(accountItemsText); // Parse the text as JSON
+          //console.log("Parsed Account Items Data:", accountItemsData);
+        } catch (jsonError) {
+          console.error("Failed to parse account items JSON:", jsonError);
+          setError('Failed to parse account items data');
+          return; // Exit early if JSON parsing fails
+        }
+        //
+        // Read bookmarkItemsResponse and parse it
+        //
+        const bookmarkItemsText = await bookmarkItemsResponse.text();
+        //console.log("Raw Bookmark Items Response:", bookmarkItemsText);
+        let bookmarkItemsData: BookmarkItem[] = [];
+        try {
+          bookmarkItemsData = JSON.parse(bookmarkItemsText); // Parse the text as JSON
+          //console.log("Parsed Bookmark Items Data:", bookmarkItemsData);
+        } catch (jsonError) {
+          console.error("Failed to parse bookmark items JSON:", jsonError);
+          setError('Failed to parse bookmark items data');
+          return; // Exit early if JSON parsing fails
+        }
+        // Set the parsed data in state
         setAccountItems(accountItemsData);
         setBookmarkItems(bookmarkItemsData);
       } catch (err) {
+        console.error("Error during fetch:", err);
         setError('Failed to fetch data');
       } finally {
         setLoading(false);
       }
     };
-
-    fetchAllData();  // Fetch data on component mount
+    fetchAllData();
   }, []);
 
   return (

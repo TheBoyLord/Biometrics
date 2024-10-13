@@ -5,11 +5,7 @@ import SvgJRCA from '@components/icons/SvgJRCA';
 
 import { useContext } from 'react';
 import { ThemeContext } from '@hooks/ThemeContext';
-
-import ThemedText from '@components/ThemedText';
-import ThemedView from '@components/ThemedView';
-import ThemedSafeAreaView from '@components/ThemedSafeAreaView';
-import ThemedStatusBar from '@components/ThemedStatusBar';
+import { ThemedText, ThemedView, ThemedSafeAreaView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
 
 const ProfileScreen = () => {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
@@ -29,7 +25,8 @@ const ProfileScreen = () => {
         <ThemedView>  
           <ThemedText style={styles.subtitle}>Days</ThemedText>
           <Link style={styles.link} href="/day2/onboarding">day2 - Onboarding</Link>
-          <Link style={styles.link} href="/day2/lottie">day2 - lottie Animarions</Link>
+          <Link style={styles.link} href="/day2/lottie">day2 - lottie Animations</Link>
+          <Link style={styles.link} href="/day2/showPDF">day2 - Show PDF</Link>
           <Link style={styles.link} href="/screens/day3/authentication">day3 - Authentication</Link>
           <Link style={styles.link} href="/user/theme">user/theme - App theme Settings</Link>
           <ThemedText>DOES THIS HAVE THE CORRECT STYLE</ThemedText>
