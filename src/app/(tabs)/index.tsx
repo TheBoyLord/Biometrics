@@ -14,7 +14,7 @@ import ActionBox from '@components/ActionBox';
 
 export default function HomeScreen() {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
-  const { accountItems, loading, error } = useMultiDataContext();
+  const { accountItems, contactItems, loading, error } = useMultiDataContext();
   const router = useRouter();
 
   // Render functions for different data types
@@ -75,7 +75,7 @@ export default function HomeScreen() {
             keyExtractor={(item) => item.id.toString()}  // Ensure each item has a unique key
             ListHeaderComponent={() => (
               <TouchableOpacity onPress={() => onApprovalRequests() } >
-                <ActionBox icon={faCheck} text="Approval requests" />
+                <ActionBox icon={faCheck} text="Approval requests" color={theme.tintColor} />
               </TouchableOpacity>
             )}    
             ListEmptyComponent={<ThemedText>No items available</ThemedText>} 

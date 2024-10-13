@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useContext } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
-import { TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { TextInput, Button, StyleSheet, Alert, ActivityIndicator, View } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 
@@ -32,6 +32,9 @@ export default function RootLayout() {
   const [hasBiometricSupport, setHasBiometricSupport] = useState<boolean>(false);
   const [passkey, setPasskey] = useState<string>('');
   const [inputPasskey, setInputPasskey] = useState<string>('');
+  
+  // Loading state for MultiDataProvider
+  const [isLoading, setIsLoading] = useState<boolean>(true); // New loading state
 
   // Load custom fonts
   const [fontsLoaded, fontError] = useFonts ({
@@ -56,6 +59,7 @@ export default function RootLayout() {
       checkBiometricSupport();
       // Trigger Face ID/Touch ID prompt
       handleBiometricAuth();
+      setIsLoading(false); // Set loading to false once the loading is complete
   }, []);
 
   // Check if the device supports biometric authentication
@@ -106,6 +110,19 @@ export default function RootLayout() {
       Alert.alert('Passkey saved securely!');
     }
   };
+  
+  // Display ActivityIndicator while data is loading
+  if (isLoading) {
+    return (
+      <ThemeProvider>
+        <ThemedSafeAreaView style={styles.safeArea}>
+          <ThemedView style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color="#990024" />
+          </ThemedView>
+        </ThemedSafeAreaView>
+      </ThemeProvider>
+    );
+  }
   
   if(!fontsLoaded && !fontError) {
     return null;
@@ -192,5 +209,10 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: 'red',
-  }
+  },
+  loaderContainer: { // New styles for the loader container
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

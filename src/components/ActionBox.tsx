@@ -17,9 +17,10 @@ import ThemedView from '@/components/Themed/ThemedView';
 interface ActionBoxProps {
   icon: IconDefinition;  // FontAwesome icons follow the IconDefinition type
   text: string;          // The label text to display
+  color: string;
 }
 
-const ActionBox: React.FC<ActionBoxProps> = ({ icon, text }) => {
+const ActionBox: React.FC<ActionBoxProps> = ({ icon, text, color }) => {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
 
   return (
@@ -27,7 +28,7 @@ const ActionBox: React.FC<ActionBoxProps> = ({ icon, text }) => {
       <ThemedView style={[styles.box, { backgroundColor: theme.shadeColor }]}>
         <ThemedView style={[styles.actionRow, { backgroundColor: theme.shadeColor }]}>
           <ThemedView style={[styles.actionLeftSection, { backgroundColor: theme.shadeColor }]}>
-            <FontAwesomeIcon icon={icon} size={20} color={theme.tintColor} />
+            <FontAwesomeIcon icon={icon} size={20} color={color ?? theme.tintColor} />
             <ThemedText style={styles.actionText}>{text}</ThemedText>
           </ThemedView>
           <FontAwesomeIcon style={styles.actionIconRight} icon={faChevronRight} size={20} color={theme.tintColor} />

@@ -1,28 +1,24 @@
 import React, { useState, useEffect, useContext, useLayoutEffect } from 'react';
-import { StyleSheet, TouchableOpacity, ActivityIndicator, View, Alert } from 'react-native';
+import { StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useRoute } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
 import { useNavigation } from 'expo-router';
 
 import { ThemeContext } from '@hooks/ThemeContext';
+import { ThemedText, ThemedView } from '@/components/Themed/ThemedComponents';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/pro-regular-svg-icons'; 
 
 import useFetch from '@hooks/useFetch';
 
-interface PdfViewerProps {
-  url: string; // Accept URL as a prop
-}
-
 interface PdfResponse {
   status: string;
   message: string;
-  pdfUrl: string; // This is the URL for the generated PDF
+  pdfData?: string; // This is the URL for the generated PDF
 }
 
-// const showStatement: React.FC<PdfViewerProps> = ({ url }) => {
 const showStatement: React.FC = () => {
   const route = useRoute();
   const { theme } = useContext(ThemeContext); // Get the current theme from context
@@ -49,83 +45,75 @@ const showStatement: React.FC = () => {
   }, [navigation, accountCode]);
   
   const [pdfUri, setPdfUri] = useState<string | null>(null);
-  const [isRendered, setIsRendered] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
-  // Step 1: Call the API to generate the PDF using your custom hook
+  // Step 1: Generate the PDF
   const { data: pdfData, loading: generatingPdf, error: generationError } = useFetch<PdfResponse>(
-    `https://internaltest.jacrox.cloud/api/mobAction.php?page=statements/createPDF&params=${accountCode}|0|1`
+    `https://internaltest.jacrox.cloud/api/mobAction.php?page=statements/createPDFData&params=${accountCode}`
   );
-  // Step 2: Download and display the PDF once the URL is available
+  // Step 2: Save the PDF to local filesystem once the data is returned
   useEffect(() => {
-    console.log('PDF Data:', pdfData);
-    if (pdfData && pdfData.pdfUrl) {
-      const downloadPDF = async () => {
-        try {
-          const pdfUrl = pdfData.pdfUrl; // Get the URL from the API response
-          const response = await fetch(pdfUrl);
-          const blob = await response.blob();
-          // Convert the blob to base64
-          const reader = new FileReader();
-          reader.readAsDataURL(blob);
-          reader.onloadend = async () => {
-            if (typeof reader.result === 'string') {
-              const base64data = reader.result.split(',')[1]; // Remove the data URL prefix
-              if (base64data) {
-                // Save the base64 PDF to local file system
-                const fileUri = FileSystem.documentDirectory + `${accountCode}-statement.pdf`;
-                await FileSystem.writeAsStringAsync(fileUri, base64data, {
-                  encoding: FileSystem.EncodingType.Base64,
-                });
-                setPdfUri(fileUri); // Set the local file URI to display in WebView
-              }
-            }
-          };
-        } catch (error) {
-          Alert.alert('Error', 'Failed to download the PDF');
-          console.error(error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      downloadPDF(); // Download the PDF using the provided URL
-    } else if (generationError) {
+    if (pdfData) {
+      if (pdfData.status === 'OK' && pdfData.pdfData) {
+        const savePDF = async () => {
+          try {
+            const base64data = pdfData.pdfData!; // Get the base64 PDF data
+            const fileUri = FileSystem.documentDirectory + `${accountCode}-statement.pdf`;
+            await FileSystem.writeAsStringAsync(fileUri, base64data, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            setPdfUri(fileUri); // Set the local file URI to display in WebView
+          } catch (error) {
+            Alert.alert('Error', 'Failed to save the PDF');
+            console.error('PDF Save Error:', error);
+            setPdfError('Failed to save the PDF');
+          }
+        };
+        savePDF();
+      } else if (pdfData.status === 'WARNING' || pdfData.status === 'FAILED') {
+        // Handle cases where there's no PDF to download
+        setPdfError(pdfData.message);
+      }
+    } else if(generationError) {
       Alert.alert('Error', 'Failed to generate the PDF');
       console.error('PDF Generation Error:', generationError);
+      setPdfError('Failed to generate the PDF');
     }
   }, [pdfData, generationError, accountCode]);
 
-  // Step 3: Trigger the delete after the PDF has been rendered in the WebView
-  const { loading: deletingPdf, error: deleteError } = useFetch<string>(
-    isRendered ? `https://internaltest.jacrox.cloud/api/deleteFile.php?filename=/statements/${accountCode}.pdf` : ''
-  );
-
-   // Show loading indicator while generating or downloading the PDF
-   if (generatingPdf || !pdfUri || deletingPdf) {
+   // Step 3: Display the error if any
+  if (pdfError) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
+      <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ThemedText>{pdfError}</ThemedText>
+      </ThemedView>
     );
   }
 
+  // Step 4: Show loading indicator while generating the PDF
+  if (generatingPdf || !pdfUri) {
+    return (
+      <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </ThemedView>
+    );
+  }
+
+  // Step 5: Show the PDF in WebView after it has been saved
   return pdfUri ? (
-      <WebView
-        source={{ uri: pdfUri }}
-        originWhitelist={['*']}
-        allowingReadAccessToURL={pdfUri} // Ensures that iOS can read local file URLs
-        style={styles.webView}
-        onLoadEnd={() => {
-          setIsRendered(true); // Set the rendered state after WebView finishes loading
-        }}
-      />
-    
+    <WebView
+      source={{ uri: pdfUri }}
+      originWhitelist={['*']}
+      allowingReadAccessToURL={pdfUri}
+      style={styles.webView}
+    />
   ) : (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <ActivityIndicator size="large" />
-    </View>
+    </ThemedView>
   );
 };
+
 
 export default showStatement;
 

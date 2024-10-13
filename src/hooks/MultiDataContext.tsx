@@ -149,6 +149,7 @@ interface ContactItem {
   contacttype: string;	
   CodeName: string;	
   RestrictedClientTeamAccess: number;
+  clientCode: string;
 }
 
 interface ClientItem {
@@ -180,43 +181,61 @@ interface TeamItem {
   EmployeeID: number;
   Description: string;
   fullName: string;
+  clientCode: string;
 }
 // Define the structure of the context
 interface MultiDataContextType {
   accountItems: AccountItem[] | null;
   bookmarkItems: BookmarkItem[] | null;
+  contactItems: ContactItem[] | null;
+  clientItems: ClientItem[] | null;
+  teamItems: TeamItem[] | null;
   loading: boolean;
   error: string | null;
 }
-
+//
 // Create the context with an initial empty value
+//
 const MultiDataContext = createContext<MultiDataContextType>({
   accountItems: null,
   bookmarkItems: null,
+  contactItems: null,
+  clientItems: null,
+  teamItems: null,
   loading: true,
   error: null,
 });
-
+//
 // Create a custom hook to use the MultiDataContext
+//
 export const useMultiDataContext = () => useContext(MultiDataContext);
-
+//
 // Create the provider component
+//
 export const MultiDataProvider = ({ children }: { children: ReactNode }) => {
   const [accountItems, setAccountItems] = useState<AccountItem[] | null>(null);
   const [bookmarkItems, setBookmarkItems] = useState<BookmarkItem[] | null>(null);
+  const [contactItems, setContactItems] = useState<ContactItem[] | null>(null);
+  const [clientItems, setClientItems] = useState<ClientItem[] | null>(null);
+  const [teamItems, setTeamItems] = useState<TeamItem[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // Step 1: Use Promise.all to fetch data concurrently
-        const [accountItemsResponse, bookmarkItemsResponse] = await Promise.all([
-          fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=1&clientCode=LOR010,PRO200'),  
-          fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=2&clientCode=LOR010,PRO200'),
-          // fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=3&contactId=1796,1343'),
-          // fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=4&contactId=1796,1343'),
-          // fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=5&contactId=1796,1343'),
+        // Use Promise.all to fetch data concurrently
+        const [accountItemsResponse
+          , bookmarkItemsResponse
+          , contactItemsResponse
+          , clientItemsResponse
+          , teamItemsResponse
+         ] = await Promise.all([
+          fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=1&clientCode=LOR010,PRO200'),   // AccountItem
+          fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=2&clientCode=LOR010,PRO200'),   // BookmarkItem
+          fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=3&clientCode=LOR010,PRO200'),   // ContactItem
+          fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=4&clientCode=LOR010,PRO200'),   // ClientItem
+          fetch('https://marketingtest.jacrox.cloud/api/mobGetData.php?mode=5&clientCode=LOR010,PRO200'),   // TeamItem
         ]);
         //
         // Read accountItemsResponse as text first, then try to parse it
@@ -246,9 +265,56 @@ export const MultiDataProvider = ({ children }: { children: ReactNode }) => {
           setError('Failed to parse bookmark items data');
           return; // Exit early if JSON parsing fails
         }
+        //
+        // Read contactItemsResponse and parse it
+        //
+        const contactItemsText = await contactItemsResponse.text();
+        //console.log("Raw Bookmark Items Response:", contactItemsText);
+        let contactItemsData: ContactItem[] = [];
+        try {
+          contactItemsData = JSON.parse(contactItemsText); // Parse the text as JSON
+          //console.log("Parsed Bookmark Items Data:", contactItemsData);
+        } catch (jsonError) {
+          console.error("Failed to parse contact items JSON:", jsonError);
+          setError('Failed to parse contact items data');
+          return; // Exit early if JSON parsing fails
+        }
+        //
+        // Read clientItemsResponse and parse it
+        //
+        const clientItemsText = await clientItemsResponse.text();
+        //console.log("Raw Bookmark Items Response:", clientItemsText);
+        let clientItemsData: ClientItem[] = [];
+        try {
+          clientItemsData = JSON.parse(clientItemsText); // Parse the text as JSON
+          //console.log("Parsed Bookmark Items Data:", clientItemsData);
+        } catch (jsonError) {
+          console.error("Failed to parse client items JSON:", jsonError);
+          setError('Failed to parse client items data');
+          return; // Exit early if JSON parsing fails
+        }
+        //
+        // Read teamItemsResponse and parse it
+        //
+        const teamItemsText = await teamItemsResponse.text();
+        //console.log("Raw Bookmark Items Response:", teamItemsText);
+        let teamItemsData: TeamItem[] = [];
+        try {
+          teamItemsData = JSON.parse(teamItemsText); // Parse the text as JSON
+          //console.log("Parsed Bookmark Items Data:", teamItemsData);
+        } catch (jsonError) {
+          console.error("Failed to parse team items JSON:", jsonError);
+          setError('Failed to parse team items data');
+          return; // Exit early if JSON parsing fails
+        }
+        //
         // Set the parsed data in state
+        //
         setAccountItems(accountItemsData);
         setBookmarkItems(bookmarkItemsData);
+        setContactItems(contactItemsData);
+        setClientItems(clientItemsData);
+        setTeamItems(teamItemsData);
       } catch (err) {
         console.error("Error during fetch:", err);
         setError('Failed to fetch data');
@@ -260,7 +326,7 @@ export const MultiDataProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <MultiDataContext.Provider value={{ accountItems, bookmarkItems, loading, error }}>
+    <MultiDataContext.Provider value={{ accountItems, bookmarkItems, contactItems, clientItems, teamItems, loading, error }}>
       {children}
     </MultiDataContext.Provider>
   );

@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/pro-regular-svg-icons'; 
 import { faFilePdf } from '@fortawesome/pro-regular-svg-icons'; 
-
+import { faFaceSmile } from '@fortawesome/pro-regular-svg-icons';
 
 import { ThemeContext } from '@hooks/ThemeContext';
 import { ThemedText, ThemedView, ThemedSafeAreaView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
@@ -18,6 +18,7 @@ import AccountSummary from '@components/AccountSummary';
 import Address from '@components/Address';
 import Team from '@components/Team';
 import ActionBox from '@components/ActionBox';
+
 
 export default function ShowDetailScreen() {
   const { accountItems, bookmarkItems, loading, error } = useMultiDataContext();
@@ -54,24 +55,21 @@ export default function ShowDetailScreen() {
   // Handle successful fetch
 
   // Step 1: Filter the data for a specific accountCode  
-  const filteredAccountItems = accountItems?.filter((accountItem) => accountItem.ddAccountNumber === accountCode);
-  const filteredBookmarkItems = bookmarkItems?.filter((bookmarkItem) => bookmarkItem.clientCode === accountCode);
+  const accountItem = accountItems?.find((accountItem) => accountItem.ddAccountNumber === accountCode);
+  const bookmarkItem = bookmarkItems?.find((bookmarkItem) => bookmarkItem.clientCode === accountCode);
+  // Ensure cchBalance is a number
+  const cchBalance = parseFloat((accountItem?.ddCCHBalance ?? 0).toString());
 
   return (
     <ThemedSafeAreaView style={styles.page}>
       <ThemedStatusBar />
       <Stack.Screen options={{ 
         headerShown: true, 
-        headerStyle: {
-          backgroundColor: theme.headerBackgroundColor, // Set the background color of the header based on the theme
-        },
-        headerTintColor: theme.headerTextColor, // Set the text color of the header
-        contentStyle: {
-          backgroundColor: theme.backgroundColor, // Set the background color for the entire screen
-        },
+        headerStyle: { backgroundColor: theme.headerBackgroundColor, },
+        headerTintColor: theme.headerTextColor, 
+        contentStyle: { backgroundColor: theme.backgroundColor, },
         headerTitleStyle: { color: theme.textColor },  
         title: "Account", 
-        //headerBackTitle: 'Back',
         headerLeft: () => (
           <TouchableOpacity onPress={() => navigation.goBack()} >
             <FontAwesomeIcon icon={faArrowLeft} size={24} color={theme.headerBackColor} />
@@ -80,33 +78,22 @@ export default function ShowDetailScreen() {
         }} 
       />
       <ThemedView style={styles.pageContent} >  
-       
-        {filteredAccountItems && filteredAccountItems.length > 0 ? (
-          filteredAccountItems.map((accountItem) => (
-            <AccountSummary key={accountItem.id} item={accountItem}></AccountSummary>
-         ))
-        ) : (
-          <ThemedText style={ styles.noDataFound }>No details found for this account code.</ThemedText>  // Display a message if no results match the filter
-        )}
+        <AccountSummary key={accountItem?.id} item={accountItem}></AccountSummary>
         
-        <TouchableOpacity onPress={() => handleShowStatement(`${accountCode}`) } >
-          <ActionBox icon={faFilePdf} text="Show statement" />
-        </TouchableOpacity>
-
-        {filteredBookmarkItems && filteredBookmarkItems.length > 0 ? (
-          filteredBookmarkItems.map((bookmarkItem) => (
-             <ThemedView key={bookmarkItem.id} style={{gap: 10}}>        
-              <Address item={bookmarkItem}></Address>
-              <Team item={bookmarkItem}></Team>
-            </ThemedView>
-         ))
+        {cchBalance === 0 ? ( 
+          <ActionBox icon={faFaceSmile} text="Happy days, no balance!" color='green'/>
         ) : (
-          <ThemedText style={ styles.noDataFound }>No details found for this account code.</ThemedText>  // Display a message if no results match the filter
-        )}
+          <TouchableOpacity onPress={() => handleShowStatement(`${accountCode}`) } >
+            <ActionBox icon={faFilePdf} text="Show statement" color={theme.tintColor}/>
+          </TouchableOpacity>
+        )} 
+        
+        <ThemedView key={bookmarkItem?.id} style={{gap: 10}}>        
+          <Address item={bookmarkItem}></Address>
+          <Team item={bookmarkItem}></Team>
+        </ThemedView>
       </ThemedView>
-     
     </ThemedSafeAreaView> 
-
   )
 }
 const styles = StyleSheet.create({
@@ -128,20 +115,10 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 10,
   },
-  image: {
-    alignSelf: 'center',
-    margin: 20,
-    marginTop: 50,
-  },
   title: {
     textAlign: 'center',
     fontSize: 24,
     paddingTop: 24,
-  },
-  description: {
-    textAlign: 'center',
-    fontSize: 16,
-    paddingTop: 16,
   },
   item: {
     marginBottom: 10,
@@ -149,9 +126,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 5,
-  },
-  noDataFound: {
-    textAlign: 'center',
-    color: 'red',
   },
 })
