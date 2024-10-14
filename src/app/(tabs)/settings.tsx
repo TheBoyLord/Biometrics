@@ -1,128 +1,67 @@
 import { useContext } from 'react';
-import { useRouter } from "expo-router";
-import { FlatList, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
-
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faAngleRight } from '@fortawesome/pro-regular-svg-icons'; 
+import { FlatList, StyleSheet } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native'; 
 
 import { ThemeContext } from '@hooks/ThemeContext';
-import { ThemedText, ThemedView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
+import { ThemedText, ThemedView } from '@/components/Themed/ThemedComponents';
+
+import ListItem from '@/components/ListItem';
 
 const SettingsScreen = () => {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
   const navigation = useNavigation(); 
 
-  // Define the props for ListItem
-  interface ListItemProps {
-    title: string;    // Title must be a string
-    badge?: string;   // Badge is optional (string)
-    link: string;
-  }
   // Settings screens
   const DATA = [
-    { id: '1', title: 'App appearance', link: '/user/theme', badge: 'New' },
-    { id: '2', title: 'User login', link: '/user/login'},      
-    { id: '3', title: 'Onboarding', link: '/day2/onboarding'},                 
+    { id: '1', title: 'Change passkey', link: '/user/todo' },
+    { id: '2', title: 'Face ID login', link: '/user/todo' },
+    { id: '3', title: 'App appearance', link: '/user/theme' },
+    { id: '4', title: 'Notification settings', link: '/user/todo' },
+    { id: '5', title: 'User login', link: '/user/login', badge: 'New', badgeColor: '#0d6efd'},      
+    { id: '6', title: 'Onboarding', link: '/day2/onboarding', badge: '1', badgeColor: '#990024' },            
   ];
 
-  // Render each item in the list
-  const ListItem: React.FC<ListItemProps> = ({ title, badge, link }) => {
-    const { theme } = useContext(ThemeContext); // Get the current theme from context
-    const router = useRouter(); 
-   
-    const handlePress = () => {
-      router.push(link);
-    };  
-    return (
-      <TouchableOpacity style={styles.item }
-        onPress={handlePress} >
-        <ThemedView style={ styles.left }>
-          <ThemedText style={ styles.title }>{title}</ThemedText>
-        </ThemedView>
-        {badge && (
-          <ThemedView style={ styles.badgeContainer }>
-            <ThemedText style={styles.badge}>{badge}</ThemedText>
-          </ThemedView>
-        )}
-        <FontAwesomeIcon icon={faAngleRight} size={24} color={theme.tintColor} />
-      </TouchableOpacity>
-    );
-  };
-
   return (
-    <SafeAreaView style={styles.page}>
-      
-      <ThemedStatusBar/>
-
+    <ThemedView style={styles.pageContainer}>
       <ThemedView style={styles.pageTitleContainer} >  
         <ThemedText style={styles.pageTitle}>Settings</ThemedText>
       </ThemedView>
-
-      <ThemedView style={ styles.container } >  
+      <ThemedView style={[ styles.container, {backgroundColor: theme.shadeColor} ] } >  
         <FlatList
           data={DATA}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => <ListItem title={item.title} badge={item.badge} link={item.link} />}
+          renderItem={({ item }) => <ListItem title={item.title} link={item.link} badge={item.badge} badgeColor={item.badgeColor}  />}
         />
       </ThemedView>
-     
-    </SafeAreaView> 
-
+    </ThemedView>
   )
 }
 export default SettingsScreen;
 
 const styles = StyleSheet.create({
+  pageContainer: {
+    flex: 1,
+  },
+  pageTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 5,
+    marginRight: 5,
+  },
+  pageTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    lineHeight: 32,
+    marginTop: 16,
+  },
   page: {
     justifyContent: 'center',
     flex: 1,
   },
   container: {
     flex: 1,
-    padding: 10,
-  },
-  pageTitleContainer: {
-    paddingLeft: 20,
-    paddingTop: 10,
-  },
-  pageTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
-  },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    marginBottom: 6,
-    marginRight: 5,
-    borderBottomColor: '#a0a0a0',
-    borderBottomWidth: 0.5,
-  },
-  left: {
-    flex: 1,
-    justifyContent: 'flex-start',
-  },
-  title: {
-    fontSize: 16,
-  },
-  badgeContainer: {
-    backgroundColor: '#0d6efd',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    marginRight: 10,
-  },
-  badge: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  icon: {
-    marginLeft: 10,
+
+    // padding: 10,
   },
 })

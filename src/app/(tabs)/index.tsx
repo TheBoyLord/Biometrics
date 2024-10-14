@@ -61,51 +61,48 @@ export default function HomeScreen() {
 
   // Handle successful fetch
   return (
-    <ThemedView style={styles.safeArea}>
-      
-      <ThemedView style={styles.container} >  
-        <ThemedView style={styles.titleContainer} >  
-          <ThemedText style={styles.title}>My Accounts</ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.listContainer}>
-          <ThemedFlatList 
-            data={accountItems}
-            renderItem={renderAccountItem}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}  // Add a separator between items
-            keyExtractor={(item) => item.id.toString()}  // Ensure each item has a unique key
-            ListHeaderComponent={() => (
-              <TouchableOpacity onPress={() => onApprovalRequests() } >
-                <ActionBox icon={faCheck} text="Approval requests" color={theme.tintColor} />
-              </TouchableOpacity>
-            )}    
-            ListEmptyComponent={<ThemedText>No items available</ThemedText>} 
-            contentContainerStyle={styles.flatListContent}
-          />
-        </ThemedView>  
-        <ThemedView style={styles.footerContainer}>
-          <Pressable onPress={onSetupDD} style={[styles.btnStd, {backgroundColor:Colors.dark.jrRed}]}>
-            <ThemedText style={styles.btnStdText}>Set up GoCardless DD</ThemedText>
-          </Pressable>
-        </ThemedView>
-      </ThemedView>        
+    <ThemedView style={styles.pageContainer}>
+      <ThemedView style={styles.pageTitleContainer} >  
+        <ThemedText style={styles.pageTitle}>My Accounts</ThemedText>
+      </ThemedView>
+      <ThemedView style={styles.listContainer}>
+        <ThemedFlatList 
+          data={accountItems}
+          renderItem={renderAccountItem}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}  // Add a separator between items
+          keyExtractor={(item) => item.id.toString()}  // Ensure each item has a unique key
+          ListHeaderComponent={() => (
+            <TouchableOpacity onPress={() => onApprovalRequests() } >
+              <ActionBox icon={faCheck} text="Approval requests" color={theme.tintColor} />
+            </TouchableOpacity>
+          )}    
+          ListEmptyComponent={<ThemedText>No items available</ThemedText>} 
+          contentContainerStyle={styles.flatListContent}
+        />
+      </ThemedView>  
+      <ThemedView style={styles.footerContainer}>
+        <Pressable onPress={onSetupDD} style={[styles.btnStd, {backgroundColor:Colors.dark.jrRed}]}>
+          <ThemedText style={styles.btnStdText}>Set up GoCardless DD</ThemedText>
+        </Pressable>
+      </ThemedView>
     </ThemedView>
   );
 }
 const styles = StyleSheet.create({
-  safeArea: {
+  pageContainer: {
     flex: 1,
   },
   container: {
     flex: 1,
     padding: 10,
   },
-  titleContainer: {
+  pageTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: 5,
     marginRight: 5,
   },
-  title: {
+  pageTitle: {
     fontSize: 32,
     fontWeight: 'bold',
     lineHeight: 32,
@@ -113,6 +110,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,  // Ensures the FlatList takes up available space
+    padding: 5,
   },
   separator: {
     height: 20, // Adjust the height for vertical spacing

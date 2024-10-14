@@ -3,11 +3,11 @@ import { useState, useEffect, useCallback, useContext } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
-import { TextInput, Button, StyleSheet, Alert, ActivityIndicator, View } from 'react-native';
+import { Platform, TextInput, Button, StyleSheet, Alert, ActivityIndicator, View } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 
-import { ThemedText, ThemedView, ThemedSafeAreaView } from '@/components/Themed/ThemedComponents';
+import { ThemedText, ThemedView, ThemedSafeAreaView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
 
 import { MultiDataProvider } from '@hooks/MultiDataContext';
 
@@ -22,7 +22,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider} from '@hooks/ThemeContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+if (Platform.OS !== 'web') {
+  SplashScreen.preventAutoHideAsync();
+}
 
 export default function RootLayout() {
   //====================================================================================
@@ -54,16 +56,19 @@ export default function RootLayout() {
 
   // After fonts and assets are loaded, hide splash screen and check for biometric support
   const handleLoadingComplete = useCallback(async () => {
-    await SplashScreen.hideAsync();
+    if(Platform.OS !== 'web') {
+      await SplashScreen.hideAsync();
       console.log('run on app init');
       checkBiometricSupport();
       // Trigger Face ID/Touch ID prompt
       handleBiometricAuth();
       setIsLoading(false); // Set loading to false once the loading is complete
+    }
   }, []);
 
   // Check if the device supports biometric authentication
   const checkBiometricSupport = async () => {
+    if(Platform.OS === 'web') return; // Skip biometric checks on web
     const compatible = await LocalAuthentication.hasHardwareAsync();
     const enrolled = await LocalAuthentication.isEnrolledAsync();
     if(compatible && enrolled) {
@@ -79,12 +84,13 @@ export default function RootLayout() {
   
   // Authenticate using Face ID or Touch ID
   const handleBiometricAuth = async () => {
+    if(Platform.OS === 'web') return; // Skip authentication on web
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: 'Authenticate with Face ID or Touch ID',
       fallbackLabel: 'Use Passkey',
     });
 
-    if (result.success) {
+    if(result.success) {
       Alert.alert('Authenticated successfully!');
       setIsAuthenticated(true);
     } else {
@@ -94,25 +100,36 @@ export default function RootLayout() {
 
   // Handle passkey submission
   const handlePasskeyAuth = async () => {
+    if(Platform.OS === 'web') {
+      // Mock passkey authentication for web
+      if(inputPasskey === 'webpass') {
+        Alert.alert('Passkey authenticated successfully!');
+        setIsAuthenticated(true);
+      } else {
+        Alert.alert('Incorrect passkey. Please try again.');
+      }
+      return;
+    }
+    // For native, use SecureStore
     const savedPasskey = await SecureStore.getItemAsync('userPasskey');
-    if (savedPasskey === inputPasskey) {
+    if(savedPasskey === inputPasskey) {
       Alert.alert('Passkey authenticated successfully!');
       setIsAuthenticated(true);
     } else {
       Alert.alert('Incorrect passkey. Please try again.');
     }
   };
-
   // Save passkey securely (e.g., during registration)
   const savePasskey = async () => {
-    if (passkey) {
+    if(Platform.OS === 'web') return; // Skip passkey saving on web
+    if(passkey) {
       await SecureStore.setItemAsync('userPasskey', passkey);
       Alert.alert('Passkey saved securely!');
     }
   };
   
   // Display ActivityIndicator while data is loading
-  if (isLoading) {
+  if(isLoading) {
     return (
       <ThemeProvider>
         <ThemedSafeAreaView style={styles.safeArea}>
@@ -132,6 +149,7 @@ export default function RootLayout() {
     <MultiDataProvider>
       <ThemeProvider>
         <ThemedSafeAreaView style={styles.safeArea}>
+          <ThemedStatusBar/>
         
           {isAuthenticated ? (
           <GestureHandlerRootView style={{ flex: 1 }}>
@@ -143,7 +161,7 @@ export default function RootLayout() {
           ) : (
           <ThemedView>
             <ThemedText style={styles.titleText}>Login</ThemedText>
-            {hasBiometricSupport ? (
+            {hasBiometricSupport && Platform.OS !== 'web' ? (
               <>
                 <Button title="Login with Face ID / Touch ID" onPress={handleBiometricAuth} />
                 <ThemedText style={styles.orText}>OR</ThemedText>
@@ -161,15 +179,19 @@ export default function RootLayout() {
             />
             <Button title="Login with Passkey" onPress={handlePasskeyAuth} />
 
-            {/* Save a new passkey */}
-            <TextInput
-              placeholder="Set new passkey"
-              secureTextEntry
-              style={styles.input}
-              value={passkey}
-              onChangeText={setPasskey}
-            />
-            <Button title="Save Passkey" onPress={savePasskey} />
+            {/* Save a new passkey (native only) */}
+            {Platform.OS !== 'web' && (
+              <>
+                <TextInput
+                  placeholder="Set new passkey"
+                  secureTextEntry
+                  style={styles.input}
+                  value={passkey}
+                  onChangeText={setPasskey}
+                />
+                <Button title="Save Passkey" onPress={savePasskey} />
+              </>
+            )}
           </ThemedView>
           )}
 

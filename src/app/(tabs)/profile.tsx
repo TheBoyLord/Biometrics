@@ -27,6 +27,7 @@ const ProfileScreen = () => {
           <Link style={styles.link} href="/day2/onboarding">day2 - Onboarding</Link>
           <Link style={styles.link} href="/day2/lottie">day2 - lottie Animations</Link>
           <Link style={styles.link} href="/day2/showPDF">day2 - Show PDF</Link>
+          <Link style={styles.link} href="/day2/showMarkdown">day2 - Show HTML markdown</Link>
           <Link style={styles.link} href="/screens/day3/authentication">day3 - Authentication</Link>
           <Link style={styles.link} href="/user/theme">user/theme - App theme Settings</Link>
           <ThemedText>DOES THIS HAVE THE CORRECT STYLE</ThemedText>
