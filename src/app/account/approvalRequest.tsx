@@ -42,11 +42,12 @@ return (
      
       <ThemedView style={styles.pageContent} >  
         <Animated.View entering={FadeIn.duration(1500)} exiting={FadeOut}>
-          <FontAwesomeIcon style={styles.image} icon={faCircleCheck} size={100} color={theme.jrRed} />
+          <FontAwesomeIcon style={styles.image} icon={faCircleCheck} size={100} color='green' />
         </Animated.View>
 
         <ThemedText style={ styles.title }>Approval Requests</ThemedText>
-        <ThemedText style={ styles.description }>List any approval requests here.</ThemedText>
+        <ThemedText style={ styles.subTitle }>Good news, you have nothing to approve.</ThemedText>
+        <ThemedText style={ styles.description }>If you do have anything to approve, you'll find it here.</ThemedText>
        
       </ThemedView>
      
@@ -70,11 +71,16 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
+    fontSize: 28,
+  },
+  subTitle: {
+    textAlign: 'center',
     fontSize: 24,
+    marginTop: 20,
+    marginBottom: 20
   },
   description: {
     textAlign: 'center',
     fontSize: 16,
-    paddingTop: 16,
   },
 })

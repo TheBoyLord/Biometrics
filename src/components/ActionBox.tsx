@@ -18,9 +18,10 @@ interface ActionBoxProps {
   icon: IconDefinition;  // FontAwesome icons follow the IconDefinition type
   text: string;          // The label text to display
   color: string;
+  fontWeight?: "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900"; // Font weight
 }
 
-const ActionBox: React.FC<ActionBoxProps> = ({ icon, text, color }) => {
+const ActionBox: React.FC<ActionBoxProps> = ({ icon, text, color, fontWeight }) => {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
 
   return (
@@ -29,7 +30,7 @@ const ActionBox: React.FC<ActionBoxProps> = ({ icon, text, color }) => {
         <ThemedView style={[styles.actionRow, { backgroundColor: theme.shadeColor }]}>
           <ThemedView style={[styles.actionLeftSection, { backgroundColor: theme.shadeColor }]}>
             <FontAwesomeIcon icon={icon} size={20} color={color ?? theme.tintColor} />
-            <ThemedText style={styles.actionText}>{text}</ThemedText>
+            <ThemedText style={[styles.actionText, { fontWeight: fontWeight || 'normal' }]}>{text}</ThemedText>
           </ThemedView>
           <FontAwesomeIcon style={styles.actionIconRight} icon={faChevronRight} size={20} color={theme.tintColor} />
         </ThemedView>
@@ -40,8 +41,8 @@ const ActionBox: React.FC<ActionBoxProps> = ({ icon, text, color }) => {
 
 const styles = StyleSheet.create({
   boxContainer: {
-    paddingTop: 10,
-    paddingBottom: 10,
+    // paddingTop: 10,
+    // paddingBottom: 10,
   },
   box: {
     borderRadius: 10,
@@ -63,7 +64,6 @@ const styles = StyleSheet.create({
     
   },
   actionText: {
-    fontWeight: 'bold',
     marginLeft: 10, // Add some space between the icons and text
   },
   actionIconRight: {

@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
-
+import { faKey, faFingerprint, faCircleHalfStroke, faBell, faRightToBracket, faSparkles} from '@fortawesome/pro-regular-svg-icons'; 
 import { useNavigation } from '@react-navigation/native'; 
 
 import { ThemeContext } from '@hooks/ThemeContext';
@@ -14,12 +14,18 @@ const SettingsScreen = () => {
 
   // Settings screens
   const DATA = [
-    { id: '1', title: 'Change passkey', link: '/user/todo' },
-    { id: '2', title: 'Face ID login', link: '/user/todo' },
-    { id: '3', title: 'App appearance', link: '/user/theme' },
-    { id: '4', title: 'Notification settings', link: '/user/todo' },
-    { id: '5', title: 'User login', link: '/user/login', badge: 'New', badgeColor: '#0d6efd'},      
-    { id: '6', title: 'Onboarding', link: '/day2/onboarding', badge: '1', badgeColor: '#990024' },            
+    // { id: '1', icon: faKey, iconColor: theme.jrRed, title: 'Change passkey', link: '/user/todo' },
+    // { id: '2', icon: faFingerprint, iconColor: '#6666ff', title: 'Face ID login', link: '/user/todo' },
+    // { id: '3', icon: faCircleHalfStroke, iconColor: '#8d8d8d', title: 'App appearance', link: '/user/theme' },
+    // { id: '4', icon: faBell, iconColor: '#A010A2', title: 'Notification settings', link: '/user/todo' },
+    // { id: '5', icon: faRightToBracket, iconColor: '#44aa44', title: 'User login', link: '/user/login', badge: 'New', badgeColor: '#0d6efd'},      
+    // { id: '6', icon: faSparkles, iconColor: '#ff5d3f', title: 'Onboarding', link: '/day2/onboarding', badge: '1', badgeColor: '#990024' },            
+    { id: '1', icon: faKey, iconColor: theme.jrRed, title: 'Change passkey', link: '/user/todo' },
+    { id: '2', icon: faFingerprint, iconColor: theme.jrRed, title: 'Face ID login', link: '/user/todo' },
+    { id: '3', icon: faCircleHalfStroke, iconColor: theme.jrRed, title: 'App appearance', link: '/user/theme' },
+    { id: '4', icon: faBell, iconColor: theme.jrRed, title: 'Notification settings', link: '/user/todo' },
+    { id: '5', icon: faRightToBracket, iconColor: theme.jrRed, title: 'User login', link: '/user/login', badge: 'New', badgeColor: '#0d6efd'},      
+    { id: '6', icon: faSparkles, iconColor: theme.jrRed, title: 'Onboarding', link: '/day2/onboarding', badge: '1', badgeColor: '#990024' },            
   ];
 
   return (
@@ -31,7 +37,7 @@ const SettingsScreen = () => {
         <FlatList
           data={DATA}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => <ListItem title={item.title} link={item.link} badge={item.badge} badgeColor={item.badgeColor}  />}
+          renderItem={({ item }) => <ListItem icon={item.icon} iconColor={item.iconColor} title={item.title} link={item.link} badge={item.badge} badgeColor={item.badgeColor}  />}
         />
       </ThemedView>
     </ThemedView>
