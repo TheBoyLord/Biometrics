@@ -41,8 +41,6 @@ const ActionBox: React.FC<ActionBoxProps> = ({ icon, text, color, fontWeight }) 
 
 const styles = StyleSheet.create({
   boxContainer: {
-    // paddingTop: 10,
-    // paddingBottom: 10,
   },
   box: {
     borderRadius: 10,

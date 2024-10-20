@@ -4,15 +4,15 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from "expo-router";
 
 import { ThemeContext } from '@hooks/ThemeContext';
-import { ThemedView, ThemedSafeAreaView } from '@/components/Themed/ThemedComponents';
+import { ThemedView, ThemedText, ThemedSafeAreaView } from '@/components/Themed/ThemedComponents';
 
 import { useMultiDataContext } from '@hooks/MultiDataContext';
 import NavBack from '@components/NavBack';
 import AccountSummary from '@components/AccountSummary';
-import Team from '@components/Team';
+import Client from '@components/Client';
 
-export default function ShowTeamScreen() {
-  const { accountItems, contactItems, bookmarkItems, teamItems } = useMultiDataContext();
+export default function ShowClient() {
+  const { accountItems, bookmarkItems, contactItems, clientItems, loading, error } = useMultiDataContext();
   const { theme } = useContext(ThemeContext); // Get the current theme from context
   const { accountCode } = useLocalSearchParams();  // Retrieve the query parameters
 
@@ -22,17 +22,23 @@ export default function ShowTeamScreen() {
   const accountItem = accountItems?.find((accountItem) => accountItem.ddAccountNumber === accountCode);
   const bookmarkItem = bookmarkItems?.find((bookmarkItem) => bookmarkItem.clientCode === accountCode);
   const contactId = bookmarkItem?.contactId;
-  const contactItem = contactItems?.find((contactItem) => contactItem.ContactID === contactId);
-  const teamList = teamItems?.filter((teamItem) => teamItem.clientCode === accountCode);
+  const contactItem = contactItems?.find((contactItem) => contactItem.clientCode === accountCode);
+  const clientItem = clientItems?.find((clientItem) => clientItem.ContactID === contactId);
 
-  // Format the partner name from: lastname, firstname 
-  const name = contactItem?.PartnerName || ''; 
-  const [lastName, firstName] = name.split(',').map(part => part.trim());
-  const partnerName = `${firstName} ${lastName}`;
-
+  if(contactItem === undefined) {
+    return (
+      <ThemedText>Cannot find contactItem for: {accountCode}</ThemedText>
+    )
+  }
+  if(clientItem === undefined) {
+    return (
+      <ThemedText>Cannot find clientItem for: {accountCode}</ThemedText>
+    )
+  }
+  
   return (
     <ThemedSafeAreaView style={styles.page}>
-      <NavBack title="My Team" />
+      <NavBack title="Address" />
       <ScrollView style={{backgroundColor: theme.backgroundColor }}>
         <ThemedView style={{gap: 10}}>      
           <ThemedView style={styles.pageContent} >  
@@ -40,7 +46,7 @@ export default function ShowTeamScreen() {
           </ThemedView>
         </ThemedView>
         <ThemedView style={styles.detailTop} >
-          <Team partner={partnerName} items={teamList}></Team>
+          <Client client={clientItem} contact={contactItem}></Client>
         </ThemedView>
       </ScrollView> 
     </ThemedSafeAreaView> 

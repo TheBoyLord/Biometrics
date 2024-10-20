@@ -1,41 +1,31 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { useContext } from 'react';
 import { ThemeContext } from '@hooks/ThemeContext';
-import ThemedText from '@/components/Themed/ThemedText';
-import ThemedView from '@/components/Themed/ThemedView';
-
+import { ThemedView } from '@/components/Themed/ThemedComponents';
+import ListDetail from '@components/ListDetail';
 
 export function Address({ item }: any) {
   const { theme } = useContext(ThemeContext); // Get the current theme from context
   return (
-    <ThemedView style={[styles.box, {backgroundColor: theme.shadeColor}]}>
-      <ThemedText style={styles.boxTitle}>Address on file:</ThemedText>
-      <ThemedText style={styles.boxSubTitle}>{item.addressLine1}</ThemedText>
-      <ThemedText style={styles.boxSubTitle}>{item.addressLine2}</ThemedText>
-      <ThemedText style={styles.boxSubTitle}>{item.addressLine3}</ThemedText>
-      <ThemedText style={styles.boxSubTitle}>{item.town}</ThemedText>
-      <ThemedText style={styles.boxSubTitle}>{item.county}</ThemedText>
+    <ThemedView style={{gap:30}} >
+      <ThemedView style={{backgroundColor: theme.shadeColor}}>
+        <ListDetail title="Address line 1" value={item.Address1}></ListDetail>
+        <ListDetail title="Address line 2" value={item.Address2}></ListDetail>
+        <ListDetail title="Address line 3" value={item.Address3}></ListDetail>
+        <ListDetail title="Town" value={item.Town}></ListDetail>
+        <ListDetail title="County" value={item.County}></ListDetail>
+        <ListDetail title="Country" value={item.Country}></ListDetail>
+        <ListDetail title="Postcode" value={item.PostCode}></ListDetail>
+      </ThemedView>
+      <ThemedView style={{backgroundColor: theme.shadeColor}}>
+        <ListDetail title="Email" value={item.Email}></ListDetail>
+      </ThemedView>
+      <ThemedView style={{backgroundColor: theme.shadeColor}}>
+        <ListDetail title="Phone" value={item.Phone}></ListDetail>
+        <ListDetail title="Mobile" value={item.Mobile}></ListDetail>
+      </ThemedView>
     </ThemedView>
   )
 }
 export default Address;
-
-const styles = StyleSheet.create({
-  box: {
-    borderRadius: 10,
-    padding: 10,
-    marginLeft: 5,
-    marginRight: 5,
-   
-  },
-  boxTitle: {
-    fontSize: 18,
-    lineHeight: 24,
-  },
-  boxSubTitle: {
-    fontSize: 12,
-    lineHeight: 20,
-  },
-});
 

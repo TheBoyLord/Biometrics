@@ -22,8 +22,6 @@ export default function ShowJobsScreen() {
   // Step 1: Filter the data for a specific accountCode  
   const accountItem = accountItems?.find((accountItem) => accountItem.ddAccountNumber === accountCode);
   const bookmarkItem = bookmarkItems?.find((bookmarkItem) => bookmarkItem.clientCode === accountCode);
-  // Ensure cchBalance is a number
-  const cchBalance = parseFloat((accountItem?.ddCCHBalance ?? 0).toString());
 
   return (
     <ThemedSafeAreaView style={styles.page}>

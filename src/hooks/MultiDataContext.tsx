@@ -101,7 +101,7 @@ interface BookmarkItem {
 
 interface ContactItem {
   id: number;	
-  ContactID: string;	
+  ContactID: number;	
   ClientID: number;	
   FullName: string;	
   PartnerName: string;	
@@ -182,6 +182,8 @@ interface TeamItem {
   Description: string;
   fullName: string;
   clientCode: string;
+  sortOrder: number;
+  show: number;
 }
 // Define the structure of the context
 interface MultiDataContextType {

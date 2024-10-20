@@ -16,7 +16,6 @@ export function AccountSummary({ item }: any) {
   const { contactItems, loading, error } = useMultiDataContext();
 
   const contactItem = contactItems?.find((contactItem) => contactItem.clientCode === item.ddAccountNumber);
-  //console.log('AccountSummary:', contactItem);
   return (
     <ThemedView style={[styles.box, {backgroundColor: theme.shadeColor}]}>
       <ThemedText style={styles.boxTitle}>{item.ddAccountNumber}</ThemedText>

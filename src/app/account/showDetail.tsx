@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { Stack, useLocalSearchParams } from "expo-router";
-import { TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; 
 import { useRouter } from "expo-router";
 
@@ -13,32 +13,27 @@ import { ThemedText, ThemedView, ThemedSafeAreaView, ThemedStatusBar } from '@/c
 import { useMultiDataContext } from '@hooks/MultiDataContext';
 
 import AccountSummary from '@components/AccountSummary';
-import Address from '@components/Address';
-import Team from '@components/Team';
 import ActionBox from '@components/ActionBox';
-import ListItem from '@/components/ListItem';
 
 export default function ShowDetailScreen() {
-  const { accountItems, bookmarkItems, loading, error } = useMultiDataContext();
+  const { accountItems, bookmarkItems, contactItems, loading, error } = useMultiDataContext();
   const { theme } = useContext(ThemeContext); // Get the current theme from context
   const navigation = useNavigation(); 
   const { accountCode } = useLocalSearchParams();  // Retrieve the query parameters
 
   const router = useRouter();
 
+  interface ActionProps {
+    icon: String;
+    text: string;
+    link: string;
+  }
+
   const DATA = [
-    // { id: '1', icon: faKey, iconColor: theme.jrRed, title: 'Change passkey', link: '/user/todo' },
-    // { id: '2', icon: faFingerprint, iconColor: '#6666ff', title: 'Face ID login', link: '/user/todo' },
-    // { id: '3', icon: faCircleHalfStroke, iconColor: '#8d8d8d', title: 'App appearance', link: '/user/theme' },
-    // { id: '4', icon: faBell, iconColor: '#A010A2', title: 'Notification settings', link: '/user/todo' },
-    // { id: '5', icon: faRightToBracket, iconColor: '#44aa44', title: 'User login', link: '/user/login', badge: 'New', badgeColor: '#0d6efd'},      
-    // { id: '6', icon: faSparkles, iconColor: '#ff5d3f', title: 'Onboarding', link: '/day2/onboarding', badge: '1', badgeColor: '#990024' },            
-    { id: '1', icon: faAddressBook, iconColor: theme.jrRed, title: 'Address', link: '/user/addressScreen' },
-    { id: '2', icon: faPeopleGroup, iconColor: theme.jrRed, title: 'Team', link: 'account/teamScreen' },
-    { id: '3', icon: faCircleHalfStroke, iconColor: theme.jrRed, title: 'App appearance', link: '/user/theme' },
-    { id: '4', icon: faBell, iconColor: theme.jrRed, title: 'Notification settings', link: '/user/todo' },
-    { id: '5', icon: faRightToBracket, iconColor: theme.jrRed, title: 'User login', link: '/user/login', badge: 'New', badgeColor: '#0d6efd'},      
-    { id: '6', icon: faSparkles, iconColor: theme.jrRed, title: 'Onboarding', link: '/day2/onboarding', badge: '1', badgeColor: '#990024' },            
+    { id: '0', icon: faAddressBook, text: 'Address/Contact details', link: '/account/showAddress' },
+    { id: '1', icon: faPeopleGroup, text: 'Personal details', link: 'account/showClient' },
+    { id: '2', icon: faPeopleGroup, text: 'My Team', link: '/account/showTeam' },
+    { id: '3', icon: faList, text: 'My Jobs', link: '/account/showJobs' },
   ];
 
   const handleShowStatement = (accountCode: string) => {
@@ -47,21 +42,10 @@ export default function ShowDetailScreen() {
       params: {accountCode},
     });
   };
-  const handleShowAddress = (accountCode: string) => {
+
+  const handleAction = (accountCode: string, link: string) => {
     router.push({
-      pathname: "/account/showAddress", 
-      params: {accountCode},
-    });
-  };
-  const handleShowTeam = (accountCode: string) => {
-    router.push({
-      pathname: "/account/showTeam", 
-      params: {accountCode},
-    });
-  };
-  const handleShowJobs = (accountCode: string) => {
-    router.push({
-      pathname: "/account/showJobs", 
+      pathname: link, 
       params: {accountCode},
     });
   };
@@ -93,8 +77,10 @@ export default function ShowDetailScreen() {
   // Step 1: Filter the data for a specific accountCode  
   const accountItem = accountItems?.find((accountItem) => accountItem.ddAccountNumber === accountCode);
   const bookmarkItem = bookmarkItems?.find((bookmarkItem) => bookmarkItem.clientCode === accountCode);
+  const contactItem = contactItems?.find((contactItem) => contactItem.clientCode === accountCode);
   // Ensure cchBalance is a number
   const cchBalance = parseFloat((accountItem?.ddCCHBalance ?? 0).toString());
+  const contactType = contactItem?.contacttype;
 
   return (
     <ThemedSafeAreaView style={styles.page}>
@@ -125,29 +111,21 @@ export default function ShowDetailScreen() {
             </TouchableOpacity>
             )} 
                 
-            <TouchableOpacity onPress={() => handleShowAddress(`${accountCode}`) } >
-              <ActionBox icon={faAddressBook} text="Address details" color={theme.tintColor} />
-            </TouchableOpacity>
+            {DATA.map((item, index) => {
+            // Conditionally change the text for the third item based on accountType
+            const text =
+              index === 1
+                ? contactType == 'Other Person'
+                  ? 'Personal details'
+                  : 'Company details'
+                : item.text;
 
-            <TouchableOpacity onPress={() => handleShowTeam(`${accountCode}`) } >
-              <ActionBox icon={faPeopleGroup} text="My Team" color={theme.tintColor}/>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => handleShowJobs(`${accountCode}`) } >
-              <ActionBox icon={faList} text="My Jobs" color={theme.tintColor}/>
-            </TouchableOpacity>
-          
-            <ThemedView key={bookmarkItem?.id} style={{gap: 10}}>        
-              <Address item={bookmarkItem}></Address>
-              <Team item={bookmarkItem}></Team>
-              <ThemedView style={[styles.box, {backgroundColor: theme.shadeColor}]}>
-                <ListItem icon={DATA[0].icon} iconColor={DATA[0].iconColor} title={DATA[0].title} link={DATA[0].link} badge={DATA[0].badge} badgeColor={DATA[0].badgeColor}  />
-                <ListItem icon={DATA[1].icon} iconColor={DATA[1].iconColor} title={DATA[1].title} link={DATA[1].link} badge={DATA[1].badge} badgeColor={DATA[1].badgeColor}  />
-                <ListItem icon={DATA[2].icon} iconColor={DATA[2].iconColor} title={DATA[2].title} link={DATA[2].link} badge={DATA[2].badge} badgeColor={DATA[2].badgeColor}  />
-                <ListItem icon={DATA[3].icon} iconColor={DATA[3].iconColor} title={DATA[3].title} link={DATA[3].link} badge={DATA[3].badge} badgeColor={DATA[3].badgeColor}  />
-              </ThemedView>
-            </ThemedView>
-            
+            return (
+              <TouchableOpacity key={item.id} onPress={() => handleAction(`${accountCode}`, item.link) } >
+                <ActionBox icon={item.icon} text={text} color={theme.tintColor} />
+              </TouchableOpacity>
+            );
+          })}
           </ThemedView >
         </ScrollView> 
       </ThemedView>
