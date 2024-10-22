@@ -12,7 +12,7 @@ import AccountSummary from '@components/AccountSummary';
 import Client from '@components/Client';
 
 export default function ShowClient() {
-  const { accountItems, bookmarkItems, contactItems, clientItems, loading, error } = useMultiDataContext();
+  const { accountItems, bookmarkItems, contactItems, clientItems, companyItems, loading, error } = useMultiDataContext();
   const { theme } = useContext(ThemeContext); // Get the current theme from context
   const { accountCode } = useLocalSearchParams();  // Retrieve the query parameters
 
@@ -24,6 +24,7 @@ export default function ShowClient() {
   const contactId = bookmarkItem?.contactId;
   const contactItem = contactItems?.find((contactItem) => contactItem.clientCode === accountCode);
   const clientItem = clientItems?.find((clientItem) => clientItem.ContactID === contactId);
+  const companyItem = companyItems?.find((companyItem) => companyItem.company_number === clientItem?.CompanyRegistrationNo);
 
   if(contactItem === undefined) {
     return (
@@ -46,7 +47,7 @@ export default function ShowClient() {
           </ThemedView>
         </ThemedView>
         <ThemedView style={styles.detailTop} >
-          <Client client={clientItem} contact={contactItem}></Client>
+          <Client client={clientItem} contact={contactItem} company={companyItem}></Client>
         </ThemedView>
       </ScrollView> 
     </ThemedSafeAreaView> 

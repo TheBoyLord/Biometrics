@@ -172,7 +172,7 @@ interface ClientItem {
   yearend: string;
   ClientSupplierType: string; 
 }
-
+// Define the structure of Team
 interface TeamItem {
   id: number;
   ContactId: number;
@@ -185,6 +185,66 @@ interface TeamItem {
   sortOrder: number;
   show: number;
 }
+// Define the structure of the company data
+interface CompanyItem {
+  accounts: {
+    accounting_reference_date: {
+      day: string;
+      month: string;
+    };
+    last_accounts: {
+      made_up_to: string;
+      period_end_on: string;
+      period_start_on: string;
+      type: string;
+    };
+    next_accounts: {
+      due_on: string;
+      overdue: boolean;
+      period_end_on: string;
+      period_start_on: string;
+    };
+    next_due: string;
+    next_made_up_to: string;
+    overdue: boolean;
+  };
+  can_file: boolean;
+  company_name: string;
+  company_number: string;
+  company_status: string;
+  confirmation_statement: {
+    last_made_up_to: string;
+    next_due: string;
+    next_made_up_to: string;
+    overdue: boolean;
+  };
+  date_of_creation: string;
+  etag: string;
+  has_been_liquidated: boolean;
+  has_charges: boolean;
+  has_insolvency_history: boolean;
+  jurisdiction: string;
+  last_full_members_list_date: string;
+  links: {
+    persons_with_significant_control: string;
+    self: string;
+    filing_history: string;
+    officers: string;
+  };
+  registered_office_address: {
+    address_line_1: string;
+    address_line_2?: string;
+    locality: string;
+    postal_code: string;
+    region: string;
+  };
+  registered_office_is_in_dispute: boolean;
+  sic_codes: string[]; // Array of strings
+  type: string;
+  undeliverable_registered_office_address: boolean;
+  has_super_secure_pscs: boolean;
+}
+
 // Define the structure of the context
 interface MultiDataContextType {
   accountItems: AccountItem[] | null;
@@ -192,6 +252,7 @@ interface MultiDataContextType {
   contactItems: ContactItem[] | null;
   clientItems: ClientItem[] | null;
   teamItems: TeamItem[] | null;
+  companyItems: CompanyItem[] | null;
   loading: boolean;
   error: string | null;
 }
@@ -204,6 +265,7 @@ const MultiDataContext = createContext<MultiDataContextType>({
   contactItems: null,
   clientItems: null,
   teamItems: null,
+  companyItems: null,
   loading: true,
   error: null,
 });
@@ -220,8 +282,58 @@ export const MultiDataProvider = ({ children }: { children: ReactNode }) => {
   const [contactItems, setContactItems] = useState<ContactItem[] | null>(null);
   const [clientItems, setClientItems] = useState<ClientItem[] | null>(null);
   const [teamItems, setTeamItems] = useState<TeamItem[] | null>(null);
+  const [companyItems, setCompanyItems] = useState<CompanyItem[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  //
+  // Get Companies House data 
+  //
+  async function getCompanyData(regNo: string): Promise<any> {
+    const paddedRegNo = regNo.padStart(8, '0');
+    const endpoint = `https://api.companieshouse.gov.uk/company/${paddedRegNo}`;
+    const authHeader = '6C_zXzSWy888EyqC8pPnrmeyB-bwQtcSj1235I6H'; // Replace with your actual auth token
+    
+    try {
+      // Make the HTTP GET request using fetch
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+      });
+      // Check if the response is OK (status code 200-299)
+      if(!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      // Parse the response JSON
+      const responseData = await response.json();
+      // Optionally wrap the result in an array (as you did in SQL)
+      const jsonResponse = [responseData];
+      // Return the JSON response
+      return jsonResponse;
+    } catch (error) {
+      console.error('Error fetching company data:', error);
+      throw error;
+    }
+  }
+  async function fetchCompanyDataForClients(clientItemsData: ClientItem[]): Promise<CompanyItem[]> {
+    // Filter out clients without a `companyRegNo` and map to an array of promises
+    const companyDataPromises = clientItemsData
+      .filter(client => client.CompanyRegistrationNo) // Only include clients with a companyRegNo
+      .map(client => getCompanyData(client.CompanyRegistrationNo) // Map to the company data fetching promise
+        .then(companyDataArray => companyDataArray[0]) // Since getCompanyData returns an array, take the first element
+        .catch(error => {
+          console.error(`Failed to fetch data for ${client.CompanyRegistrationNo}:`, error);
+          return null; // In case of error, return null so we can handle it
+        })
+      );
+    // Wait for all promises to resolve
+    const companyDataArray = await Promise.all(companyDataPromises);
+    // Filter out any null values (where there was an error)
+    return companyDataArray.filter(companyData => companyData !== null) as CompanyItem[];
+  }
+
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -317,6 +429,19 @@ export const MultiDataProvider = ({ children }: { children: ReactNode }) => {
         setContactItems(contactItemsData);
         setClientItems(clientItemsData);
         setTeamItems(teamItemsData);
+        //
+        // Get misc data based on data already received
+        //
+        (async () => {
+          try {
+            //let companyItemsData: CompanyItem[] = [];
+            const companyData = await fetchCompanyDataForClients(clientItemsData);
+            //console.log('Fetched company data:', companyData);
+            setCompanyItems(companyData);
+          } catch (error) {
+            console.error('Error fetching company data for clients:', error);
+          }
+        })();
       } catch (err) {
         console.error("Error during fetch:", err);
         setError('Failed to fetch data');
@@ -328,7 +453,7 @@ export const MultiDataProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <MultiDataContext.Provider value={{ accountItems, bookmarkItems, contactItems, clientItems, teamItems, loading, error }}>
+    <MultiDataContext.Provider value={{ accountItems, bookmarkItems, contactItems, clientItems, teamItems, companyItems, loading, error }}>
       {children}
     </MultiDataContext.Provider>
   );

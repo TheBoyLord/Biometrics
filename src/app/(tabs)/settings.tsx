@@ -4,7 +4,7 @@ import { faKey, faFingerprint, faCircleHalfStroke, faBell, faRightToBracket, faS
 import { useNavigation } from '@react-navigation/native'; 
 
 import { ThemeContext } from '@hooks/ThemeContext';
-import { ThemedText, ThemedView } from '@/components/Themed/ThemedComponents';
+import { ThemedText, ThemedView, ThemedSafeAreaView, ThemedStatusBar } from '@/components/Themed/ThemedComponents';
 
 import ListItem from '@/components/ListItem';
 
@@ -14,12 +14,6 @@ const SettingsScreen = () => {
 
   // Settings screens
   const DATA = [
-    // { id: '1', icon: faKey, iconColor: theme.jrRed, title: 'Change passkey', link: '/user/todo' },
-    // { id: '2', icon: faFingerprint, iconColor: '#6666ff', title: 'Face ID login', link: '/user/todo' },
-    // { id: '3', icon: faCircleHalfStroke, iconColor: '#8d8d8d', title: 'App appearance', link: '/user/theme' },
-    // { id: '4', icon: faBell, iconColor: '#A010A2', title: 'Notification settings', link: '/user/todo' },
-    // { id: '5', icon: faRightToBracket, iconColor: '#44aa44', title: 'User login', link: '/user/login', badge: 'New', badgeColor: '#0d6efd'},      
-    // { id: '6', icon: faSparkles, iconColor: '#ff5d3f', title: 'Onboarding', link: '/day2/onboarding', badge: '1', badgeColor: '#990024' },            
     { id: '1', icon: faKey, iconColor: theme.jrRed, title: 'Change passkey', link: '/user/todo' },
     { id: '2', icon: faFingerprint, iconColor: theme.jrRed, title: 'Face ID login', link: '/user/todo' },
     { id: '3', icon: faCircleHalfStroke, iconColor: theme.jrRed, title: 'App appearance', link: '/user/theme' },
@@ -29,23 +23,29 @@ const SettingsScreen = () => {
   ];
 
   return (
-    <ThemedView style={styles.pageContainer}>
-      <ThemedView style={styles.pageTitleContainer} >  
-        <ThemedText style={styles.pageTitle}>Settings</ThemedText>
+    <ThemedSafeAreaView style={styles.safeArea}>
+      <ThemedStatusBar/>
+      <ThemedView style={styles.pageContainer}>
+        <ThemedView style={styles.pageTitleContainer} >  
+          <ThemedText style={styles.pageTitle}>Settings</ThemedText>
+        </ThemedView>
+        <ThemedView style={[ styles.container, {backgroundColor: theme.shadeColor} ] } >  
+          <FlatList
+            data={DATA}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => <ListItem icon={item.icon} iconColor={item.iconColor} title={item.title} link={item.link} badge={item.badge} badgeColor={item.badgeColor}  />}
+          />
+        </ThemedView>
       </ThemedView>
-      <ThemedView style={[ styles.container, {backgroundColor: theme.shadeColor} ] } >  
-        <FlatList
-          data={DATA}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => <ListItem icon={item.icon} iconColor={item.iconColor} title={item.title} link={item.link} badge={item.badge} badgeColor={item.badgeColor}  />}
-        />
-      </ThemedView>
-    </ThemedView>
+    </ThemedSafeAreaView>
   )
 }
 export default SettingsScreen;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   pageContainer: {
     flex: 1,
   },
