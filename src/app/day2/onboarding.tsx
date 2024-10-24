@@ -15,9 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faUser,  faBoltLightning } from '@fortawesome/free-solid-svg-icons'; 
 import { faAlien } from '@fortawesome/pro-regular-svg-icons'; 
 
-
 import SvgJRCA from '@components/icons/SvgJRCA'; 
-
 
 const onboardingSteps = [
   {

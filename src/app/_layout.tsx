@@ -128,6 +128,15 @@ export default function RootLayout() {
     }
   };
   
+  // Clear stored passkey and reset state for logout
+  const logout = async () => {
+    setIsAuthenticated(false);
+    setInputPasskey('');  // Clear passkey input
+    setPasskey('');       // Clear passkey field
+    await SecureStore.deleteItemAsync('userPasskey'); // Delete passkey from storage
+    Alert.alert('You have been logged out.');
+  };
+
   // Display ActivityIndicator while data is loading
   if(isLoading) {
     return (
@@ -155,6 +164,8 @@ export default function RootLayout() {
           <GestureHandlerRootView style={{ flex: 1 }}>
             <Stack>  
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="user/login" options={{ headerShown: false }} />
+              <Stack.Screen name="user/logout" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
             </Stack>     
           </GestureHandlerRootView>

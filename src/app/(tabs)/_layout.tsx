@@ -1,11 +1,12 @@
-import { Tabs } from 'expo-router';
-import { StyleSheet } from 'react-native';
-import { useContext } from 'react';
+import { Tabs, Stack, useRouter } from 'expo-router';
+import { StyleSheet, Button } from 'react-native';
+import React, { useContext, useState } from 'react';
 import { useColorScheme } from '@hooks/useColorScheme';
 // FontAwesome Icons
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHome, faUser, faGear } from '@fortawesome/pro-thin-svg-icons'; 
+import { faHome, faUser, faGear, faListDots } from '@fortawesome/pro-thin-svg-icons'; 
 
+import { ThemedView } from '@/components/Themed/ThemedComponents';
 import { ThemeContext } from '@hooks/ThemeContext';
 
 const TabLayout = () => {
@@ -42,7 +43,7 @@ const TabLayout = () => {
         options={{
           title: 'Account',
           tabBarIcon: ({ focused, color, size }) => (
-            <FontAwesomeIcon style={styles.icon} icon={faUser} color={focused ? '#990024' : 'gray'} size={focused ? 30 : 25} />
+            <FontAwesomeIcon style={styles.icon} icon={faListDots} color={focused ? '#990024' : 'gray'} size={focused ? 30 : 25} />
           ),
         }}
       />
@@ -56,14 +57,50 @@ const TabLayout = () => {
           ),
         }}
       />
-     
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ focused }) => (
+            <FontAwesomeIcon
+              style={styles.icon}
+              icon={faUser}
+              color={focused ? '#990024' : 'gray'}
+              size={focused ? 30 : 25}
+            />
+          ),
+        }}
+      />
+
+
     </Tabs>
   );
 }
-export default TabLayout
+
+// Main layout component with authentication logic
+const Layout = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true); // Simulate initial authenticated state
+  const router = useRouter();
+
+  return isAuthenticated ? (
+    <TabLayout/> 
+  ) : (
+    <ThemedView style={styles.centered}>
+      <Button title="Go to Login" onPress={() => router.replace('/user/login')} />
+    </ThemedView>
+  );
+};
+
+export default Layout;
 
 const styles = StyleSheet.create({
   icon: {
     marginTop: 4,  
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })
